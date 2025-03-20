@@ -1,8 +1,8 @@
 class ToDo {
   String? id;
   String? ToDoText;
-  int ?priority;
-  bool ?isNotify;
+  int? priority;
+  bool? isNotify;
   DateTime? date;
   bool isDone;
 
@@ -15,14 +15,30 @@ class ToDo {
     this.isDone = false,
   });
 
-  static List<ToDo> ToDoList(){
-    return [
-      ToDo(id: "1", ToDoText: "AAAA", date: DateTime(2025,3,9,12,30), isDone: true),
-      ToDo(id: "2", ToDoText: "BBBBB", date: DateTime(2025,3,9)),
-      ToDo(id: "3", ToDoText: "CCCCC", date: DateTime(2025,3,9)),
-      ToDo(id: "4", ToDoText: "DDDDD", date: DateTime(2025,3,9)),
-      ToDo(id: "5", ToDoText: "EEEEE", date: DateTime(2025,3,9)),
-      ToDo(id: "6", ToDoText: "FFFFEEEE", date: DateTime(2025,3,9)),
-    ];
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'ToDoText': ToDoText,
+      'priority': priority,
+      'isNotify': isNotify == true ? 1 : 0,
+      'date': date?.toIso8601String(),  
+      'isDone': isDone ? 1 : 0,
+    };
   }
+
+  factory ToDo.fromMap(Map<String, dynamic> map) {
+    return ToDo(
+      id: map['id'],
+      ToDoText: map['ToDoText'],
+      priority: map['priority'],
+      isNotify: map['isNotify'] == 1,
+      date: map['date'] != null
+          ? (map['date'] is int 
+              ? DateTime.fromMillisecondsSinceEpoch(map['date']) 
+              : DateTime.tryParse(map['date']) ?? DateTime.fromMillisecondsSinceEpoch(int.parse(map['date'])))  
+          : null,
+      isDone: map['isDone'] == 1,
+    );
+  }
+
 }

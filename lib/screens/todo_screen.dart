@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
 import '../components/todo_items.dart';
+import '../database/database_helper.dart';
+import '../models/todo.dart';
 
 class TodoScreen extends StatefulWidget {
   TodoScreen({Key? key}) : super(key: key);
@@ -10,20 +12,47 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<TodoScreen> {
-  List<ToDo> todoList = ToDo.ToDoList();
+  List<ToDo> todoList = [];
   List<ToDo> _foundToDoLlist = [];
 
   @override
-  void initState(){
-    _foundToDoLlist = todoList;
-    super.initState();
+  void initState() {
+  super.initState();
+  _initializeToDoList();
   }
 
-  void _deleteToDoItem(String id) {
+  void _initializeToDoList() async {
+    List<ToDo> data = await DatabaseHelper.instance.getAllToDos(); 
+
+    if (data.isEmpty) {
+      List<ToDo> defaultTodos = [
+        ToDo(id: "1", ToDoText: "Học Flutter", priority: 1, isNotify: false, date: DateTime.now()),
+        ToDo(id: "2", ToDoText: "Tập thể dục", priority: 2, isNotify: false, date: DateTime.now()),
+        ToDo(id: "3", ToDoText: "Đọc sách", priority: 2, isNotify: true, date: DateTime.now()),
+        ToDo(id: "4", ToDoText: "Viết báo cáo", priority: 1, isNotify: false, date: DateTime.now()),
+        ToDo(id: "5", ToDoText: "Đi ngủ sớm", priority: 3, isNotify: false, date: DateTime.now()),
+      ];
+
+      for (var todo in defaultTodos) {
+        await DatabaseHelper.instance.insertToDo(todo); 
+      }
+
+      data = await DatabaseHelper.instance.getAllToDos(); 
+    }
+
     setState(() {
-      todoList.removeWhere((item) => item.id == id);
+      todoList = data;
+      _foundToDoLlist = data;
     });
   }
+
+  void _deleteToDoItem(String id) async {
+    await DatabaseHelper.instance.deleteToDo(id); 
+    setState(() {
+      todoList.removeWhere((item) => item.id == id); 
+    });
+  }
+
 
   void _searching(String enteredKey)
   {
@@ -45,183 +74,181 @@ class _HomeState extends State<TodoScreen> {
     });
   }
 
-  void _showBottomSheet(ToDo ?t) {
-      TextEditingController _textController = TextEditingController(text: t?.ToDoText ?? "");
-      int _selectedRadio = t?.priority ?? 1;
-      bool _switchValue = t?.isNotify ?? false;
-      DateTime _selectedDate = t?.date ?? DateTime.now();
-      TimeOfDay _selectedTime = TimeOfDay(
-        hour: _selectedDate.hour,
-        minute: _selectedDate.minute,
-      );
+void _showBottomSheet(ToDo? t) {
+  TextEditingController _textController = TextEditingController(text: t?.ToDoText ?? "");
+  int _selectedRadio = t?.priority ?? 1;
+  bool _switchValue = t?.isNotify ?? false;
+  DateTime _selectedDate = t?.date ?? DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay(
+    hour: _selectedDate.hour,
+    minute: _selectedDate.minute,
+  );
 
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-        ),
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: _textController,
-                      decoration: InputDecoration(hintText: "Nhập văn bản..."),
-                    ),
-                    SizedBox(height: 16),
-                    Column(
-                      children: [
-                        RadioListTile(//demo radio check
-                          title: Text("Quan trọng"),
-                          value: 1,
-                          groupValue: _selectedRadio,
-                          onChanged: (int? value) {
-                            setState(() => _selectedRadio = value ?? 1);
-                          },
-                        ),
-                        RadioListTile(
-                          title: Text("Bình thường"),
-                          value: 2,
-                          groupValue: _selectedRadio,
-                          onChanged: (int? value) {
-                            setState(() => _selectedRadio = value ?? 1);
-                          },
-                        ),
-                        RadioListTile(
-                          title: Text("Không quan trọng"),
-                          value: 3,
-                          groupValue: _selectedRadio,
-                          onChanged: (int? value) {
-                            setState(() => _selectedRadio = value ?? 1);
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Bật/Tắt thông báo"),
-                        Switch(//demo switch
-                          value: _switchValue,
-                          onChanged: (bool value) {
-                            setState(() => _switchValue = value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
-                        ElevatedButton(
-                          onPressed: () async {
-                            DateTime? pickedDate = await showDatePicker(//demo datepicker
-                              context: context,
-                              initialDate: _selectedDate,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              setState(() => _selectedDate = pickedDate);
-                            }
-                          },
-                          child: Text("Chọn ngày"),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Giờ: ${_selectedTime.hour}:${_selectedTime.minute}"),
-                        ElevatedButton(
-                          onPressed: () async {
-                            TimeOfDay? pickedTime = await showTimePicker(//demo TimePicker
-                              context: context,
-                              initialTime: _selectedTime,
-                            );
-                            if (pickedTime != null) {
-                              setState(() => _selectedTime = pickedTime);
-                            }
-                          },
-                          child: Text("Chọn giờ"),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text("Hủy"),
-                        ),
-                        SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
+  showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _textController,
+                    decoration: InputDecoration(hintText: "Nhập văn bản..."),
+                  ),
+                  SizedBox(height: 16),
+                  Column(
+                    children: [
+                      RadioListTile(
+                        title: Text("Quan trọng"),
+                        value: 1,
+                        groupValue: _selectedRadio,
+                        onChanged: (int? value) {
+                          setState(() => _selectedRadio = value ?? 1);
+                        },
+                      ),
+                      RadioListTile(
+                        title: Text("Bình thường"),
+                        value: 2,
+                        groupValue: _selectedRadio,
+                        onChanged: (int? value) {
+                          setState(() => _selectedRadio = value ?? 1);
+                        },
+                      ),
+                      RadioListTile(
+                        title: Text("Không quan trọng"),
+                        value: 3,
+                        groupValue: _selectedRadio,
+                        onChanged: (int? value) {
+                          setState(() => _selectedRadio = value ?? 1);
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Bật/Tắt thông báo"),
+                      Switch(
+                        value: _switchValue,
+                        onChanged: (bool value) {
+                          setState(() => _switchValue = value);
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
+                      ElevatedButton(
+                        onPressed: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: _selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (pickedDate != null) {
+                            setState(() => _selectedDate = pickedDate);
+                          }
+                        },
+                        child: Text("Chọn ngày"),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Giờ: ${_selectedTime.hour}:${_selectedTime.minute}"),
+                      ElevatedButton(
+                        onPressed: () async {
+                          TimeOfDay? pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: _selectedTime,
+                          );
+                          if (pickedTime != null) {
+                            setState(() => _selectedTime = pickedTime);
+                          }
+                        },
+                        child: Text("Chọn giờ"),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text("Hủy"),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
 
-                            if(t != null)
-                            {
-                              t.ToDoText = _textController.text;
-                              t.priority = _selectedRadio;
-                              t.isNotify = _switchValue;
-                              t.date = DateTime(
+                          DateTime selectedDateTime = DateTime(
                             _selectedDate.year,
                             _selectedDate.month,
                             _selectedDate.day,
                             _selectedTime.hour,
                             _selectedTime.minute,
-                            );
-                            }
-                            else{
-                              String toDoID = getID();
-                            String toDoText = _textController.text;
-                            int priority = _selectedRadio; 
-                            bool notificationEnabled = _switchValue;
-                            DateTime selectedDateTime = DateTime(
-                              _selectedDate.year,
-                              _selectedDate.month,
-                              _selectedDate.day,
-                              _selectedTime.hour,
-                              _selectedTime.minute,
-                            );
+                          );
 
+                          if (t != null) {
+                            // Cập nhật dữ liệu
+                            t.ToDoText = _textController.text;
+                            t.priority = _selectedRadio;
+                            t.isNotify = _switchValue;
+                            t.date = selectedDateTime;
+
+                            // Gọi hàm update database
+                            await DatabaseHelper.instance.updateToDo(t);
+                            setState(() {});
+                          } else {
+                            String toDoID = getID();
                             ToDo newToDo = ToDo(
                               id: toDoID,
-                              ToDoText: toDoText,
-                              priority: priority,
-                              isNotify: notificationEnabled,
+                              ToDoText: _textController.text,
+                              priority: _selectedRadio,
+                              isNotify: _switchValue,
                               date: selectedDateTime,
                             );
 
+                            await DatabaseHelper.instance.insertToDo(newToDo);
                             _addToDo(newToDo);
-                            }   
-                          },
-                          child: Text(t != null ? "Lưu" : "OK"),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    }
+                          }
+
+                        },
+                        child: Text(t != null ? "Lưu" : "OK"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
 
-  void _addToDo(ToDo t) {
+
+  void _addToDo(ToDo t) async {
+    await DatabaseHelper.instance.insertToDo(t); 
     setState(() {
-      todoList.add(t);
+      todoList.add(t); 
     });
   }
 

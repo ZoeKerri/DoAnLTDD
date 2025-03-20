@@ -1,15 +1,6 @@
 import 'package:doanltdd/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LogInScreen(),
-    );
-  }
-}
-
 class LogInScreen extends StatefulWidget {
   const LogInScreen ({super.key});
   @override
@@ -19,6 +10,17 @@ class LogInScreen extends StatefulWidget {
 class _LogInScreenState extends State<LogInScreen> {
   bool isLogin = true;
 
+  // Key cho form validation
+  final _loginFormKey = GlobalKey<FormState>();
+  final _signUpFormKey = GlobalKey<FormState>();
+
+  // Controllers để lấy dữ liệu nhập
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController signUpPasswordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +28,8 @@ class _LogInScreenState extends State<LogInScreen> {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/todo_background.jpg"), // Ảnh nền
-            fit: BoxFit.cover, // Phủ toàn bộ màn hình
+            fit: BoxFit.cover,
+            alignment: Alignment.center
           ),
         ),
         child: Center(
@@ -71,6 +74,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   ],
                 ),
                 SizedBox(height: 20),
+
                 // Animated Form chuyển đổi
                 AnimatedCrossFade(
                   firstChild: buildLoginForm(),
@@ -90,69 +94,103 @@ class _LogInScreenState extends State<LogInScreen> {
 
   // Form Login
   Widget buildLoginForm() {
-    return Column(
-      children: [
-        buildTextField("Username"),
-        SizedBox(height: 10),
-        buildTextField("Password", isPassword: true),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+    return Form(
+      key: _loginFormKey,
+      child: Column(
+        children: [
+          buildTextField("Username", controller: usernameController, validator: (value) {
+            if (value == null || value.isEmpty) return "Username không được để trống";
+            return null;
+          }),
+          SizedBox(height: 10),
+          buildTextField("Password", isPassword: true, controller: passwordController, validator: (value) {
+            if (value == null || value.length < 6) return "Mật khẩu tối thiểu 6 ký tự";
+            return null;
+          }),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              if (_loginFormKey.currentState!.validate()) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Đăng nhập thành công!")),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              child: Text("Login", style: TextStyle(fontSize: 18)),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            child: Text("Login", style: TextStyle(fontSize: 18)),
-          ),
-        ),
-        SizedBox(height: 20)
-      ],
+          SizedBox(height: 20)
+        ],
+      ),
     );
   }
 
   // Form Sign Up
   Widget buildSignUpForm() {
-    return Column(
-      children: [
-        buildTextField("Name"),
-        SizedBox(height: 10),
-        buildTextField("Email"),
-        SizedBox(height: 10),
-        buildTextField("Password", isPassword: true),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              isLogin = true;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+    return Form(
+      key: _signUpFormKey,
+      child: Column(
+        children: [
+          buildTextField("Name", controller: nameController, validator: (value) {
+            if (value == null || value.isEmpty) return "Name không được để trống";
+            return null;
+          }),
+          SizedBox(height: 10),
+          buildTextField("Email", controller: emailController, validator: (value) {
+            if (value == null || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              return "Email không hợp lệ";
+            }
+            return null;
+          }),
+          SizedBox(height: 10),
+          buildTextField("Password", isPassword: true, controller: signUpPasswordController, validator: (value) {
+            if (value == null || value.length < 6) return "Mật khẩu tối thiểu 6 ký tự";
+            return null;
+          }),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              if (_signUpFormKey.currentState!.validate()) {
+                setState(() {
+                  isLogin = true;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Đăng ký thành công!")),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              child: Text("Sign Up", style: TextStyle(fontSize: 18)),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            child: Text("Sign Up", style: TextStyle(fontSize: 18)),
-          ),
-        ),
-        SizedBox(height: 20)
-      ],
+          SizedBox(height: 20)
+        ],
+      ),
     );
   }
 
-  // Widget ô nhập liệu
-  Widget buildTextField(String hint, {bool isPassword = false}) {
-    return TextField(
+  // Widget ô nhập liệu với kiểm tra
+  Widget buildTextField(String hint, {bool isPassword = false, TextEditingController? controller, String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: controller,
       obscureText: isPassword,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
@@ -165,7 +203,7 @@ class _LogInScreenState extends State<LogInScreen> {
           borderSide: BorderSide.none,
         ),
       ),
+      validator: validator, // Thêm validator để kiểm tra dữ liệu
     );
   }
 }
-

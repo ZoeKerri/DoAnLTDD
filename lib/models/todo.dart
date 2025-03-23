@@ -1,6 +1,6 @@
 class ToDo {
   String? id;
-  String? ToDoText;
+  String? todoTitle;
   int? priority;
   bool? isNotify;
   DateTime? date;
@@ -8,7 +8,7 @@ class ToDo {
 
   ToDo({
     required this.id,
-    required this.ToDoText,
+    required this.todoTitle,
     required this.date,
     this.priority = 3,
     this.isNotify = false,
@@ -18,7 +18,7 @@ class ToDo {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'ToDoText': ToDoText,
+      'ToDoText': todoTitle,
       'priority': priority,
       'isNotify': isNotify == true ? 1 : 0,
       'date': date?.toIso8601String(),  
@@ -29,7 +29,7 @@ class ToDo {
   factory ToDo.fromMap(Map<String, dynamic> map) {
     return ToDo(
       id: map['id'],
-      ToDoText: map['ToDoText'],
+      todoTitle: map['ToDoText'],
       priority: map['priority'],
       isNotify: map['isNotify'] == 1,
       date: map['date'] != null

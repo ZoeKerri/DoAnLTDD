@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\HUIT file\HK6-HUIT\Mobile platform\doanltdd\build\windows\x64\CMakeFiles\988a76587fc6b874223e1ac930aa47ac\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{3B661290-B9DD-3D22-80F8-BB8C7B63C9BE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

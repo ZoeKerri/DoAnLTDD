@@ -1,0 +1,11 @@
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/icudtl.dat
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/flutter_windows.dll
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/AssetManifest.bin
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/AssetManifest.json
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/FontManifest.json
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/kernel_blob.bin
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/NativeAssetsManifest.json
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/NOTICES.Z
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/Debug/data/flutter_assets/shaders/ink_sparkle.frag

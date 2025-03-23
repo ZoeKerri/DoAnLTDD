@@ -21,30 +21,15 @@ class _HomeState extends State<TodoScreen> {
   _initializeToDoList();
   }
 
-  void _initializeToDoList() async {
+ void _initializeToDoList() async {
     List<ToDo> data = await DatabaseHelper.instance.getAllToDos(); 
-
-    if (data.isEmpty) {
-      List<ToDo> defaultTodos = [
-        ToDo(id: "1", ToDoText: "Học Flutter", priority: 1, isNotify: false, date: DateTime.now()),
-        ToDo(id: "2", ToDoText: "Tập thể dục", priority: 2, isNotify: false, date: DateTime.now()),
-        ToDo(id: "3", ToDoText: "Đọc sách", priority: 2, isNotify: true, date: DateTime.now()),
-        ToDo(id: "4", ToDoText: "Viết báo cáo", priority: 1, isNotify: false, date: DateTime.now()),
-        ToDo(id: "5", ToDoText: "Đi ngủ sớm", priority: 3, isNotify: false, date: DateTime.now()),
-      ];
-
-      for (var todo in defaultTodos) {
-        await DatabaseHelper.instance.insertToDo(todo); 
-      }
-
-      data = await DatabaseHelper.instance.getAllToDos(); 
-    }
 
     setState(() {
       todoList = data;
       _foundToDoLlist = data;
     });
   }
+
 
   void _deleteToDoItem(String id) async {
     await DatabaseHelper.instance.deleteToDo(id); 
@@ -63,7 +48,7 @@ class _HomeState extends State<TodoScreen> {
     }
     else{
       results = todoList
-      .where((item) => item.ToDoText!
+      .where((item) => item.todoTitle!
       .toLowerCase()
       .contains(enteredKey.toLowerCase())
       ).toList();
@@ -75,7 +60,7 @@ class _HomeState extends State<TodoScreen> {
   }
 
 void _showBottomSheet(ToDo? t) {
-  TextEditingController _textController = TextEditingController(text: t?.ToDoText ?? "");
+  TextEditingController _textController = TextEditingController(text: t?.todoTitle ?? "");
   int _selectedRadio = t?.priority ?? 1;
   bool _switchValue = t?.isNotify ?? false;
   DateTime _selectedDate = t?.date ?? DateTime.now();
@@ -207,25 +192,22 @@ void _showBottomSheet(ToDo? t) {
 
                           if (t != null) {
                             // Cập nhật dữ liệu
-                            t.ToDoText = _textController.text;
+                            t.todoTitle = _textController.text;
                             t.priority = _selectedRadio;
                             t.isNotify = _switchValue;
                             t.date = selectedDateTime;
 
-                            // Gọi hàm update database
-                            await DatabaseHelper.instance.updateToDo(t);
-                            setState(() {});
+                            _updateToDo(t);
                           } else {
                             String toDoID = getID();
                             ToDo newToDo = ToDo(
                               id: toDoID,
-                              ToDoText: _textController.text,
+                              todoTitle: _textController.text,
                               priority: _selectedRadio,
                               isNotify: _switchValue,
                               date: selectedDateTime,
                             );
 
-                            await DatabaseHelper.instance.insertToDo(newToDo);
                             _addToDo(newToDo);
                           }
 
@@ -249,6 +231,17 @@ void _showBottomSheet(ToDo? t) {
     await DatabaseHelper.instance.insertToDo(t); 
     setState(() {
       todoList.add(t); 
+    });
+  }
+  
+  void _updateToDo(ToDo t) async {
+    await DatabaseHelper.instance.updateToDo(t);
+    
+    setState(() {
+      int index = todoList.indexWhere((todo) => todo.id == t.id);
+      if (index != -1) {
+        todoList[index] = t; 
+      }
     });
   }
 
@@ -349,9 +342,7 @@ void _showBottomSheet(ToDo? t) {
     }
     String getID() {
       if (todoList.isNotEmpty) {
-        ToDo t = todoList.last;
-        int numID = int.parse(t.id ?? "-1") + 1;
-        return numID.toString();
+        return DateTime.now().millisecondsSinceEpoch.toString().toString();
       }
       return "1"; // Trả về chuỗi rỗng nếu danh sách rỗng
     }

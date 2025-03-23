@@ -88,7 +88,7 @@ void _showDialog(bool status) {
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(widget.todo.ToDoText ?? "", style: TextStyle(fontSize: 16, color: Colors.black,
+            Text(widget.todo.todoTitle ?? "", style: TextStyle(fontSize: 16, color: Colors.black,
               decoration: widget.todo.isDone ? TextDecoration.lineThrough : TextDecoration.none,),
               ),
              Text(

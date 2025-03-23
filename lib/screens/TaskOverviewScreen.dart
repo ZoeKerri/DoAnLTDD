@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../models/todo.dart';
+import '../database/database_helper.dart';
+import 'package:intl/intl.dart';
 
 class TaskOverviewScreen extends StatefulWidget {
   const TaskOverviewScreen({super.key});
@@ -9,9 +12,9 @@ class TaskOverviewScreen extends StatefulWidget {
 
 class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
   // Dữ liệu gốc: các nhóm task theo ngày
-  late List<DayGroup> _originalDayGroups;
+  late List<DayGroup> _originalDayGroups = [];
   // Dữ liệu hiển thị sau khi lọc cho từng nhóm (ban đầu bằng dữ liệu gốc)
-  late List<DayGroup> _filteredDayGroups;
+  late List<DayGroup> _filteredDayGroups = [];
 
   // Các biến lưu tiêu chí lọc (áp dụng cho từng nhóm khi nhấn Lọc)
   int? _selectedPriorityFilter; // 1, 2, 3 hoặc null (không lọc theo mức độ)
@@ -21,77 +24,39 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
   @override
   void initState() {
     super.initState();
-    _originalDayGroups = [
-      DayGroup(
-        dayLabel: "Hôm nay",
-        tasks: [
-          Task(
-            title: "Daily Scrum Meeting",
-            statusLabel: "IN REVIEW",
-            statusColor: Colors.orange[300],
-            shortLabel: "R",
-            shortLabelColor: Colors.blue,
-            dateTimeText: "10:30",
-            userAvatars: ["S", "J", "D"],
-            priority: 1,
-          ),
-          Task(
-            title: "Project Standup",
-            statusLabel: "COMPLETED",
-            statusColor: Colors.green[300],
-            shortLabel: "C",
-            shortLabelColor: Colors.green,
-            dateTimeText: "11:00",
-            userAvatars: ["M", "A"],
-            priority: 3,
-          ),
-          Task(
-            title: "Review Docs",
-            statusLabel: "PENDING",
-            statusColor: Colors.yellow[300],
-            shortLabel: "P",
-            shortLabelColor: Colors.orange,
-            dateTimeText: "13:00",
-            userAvatars: ["X", "Y"],
-            priority: 2,
-          ),
-        ],
-      ),
-      DayGroup(
-        dayLabel: "Ngày mai",
-        tasks: [
-          Task(
-            title: "Design Review",
-            statusLabel: "IN PROGRESS",
-            statusColor: Colors.purple[200],
-            shortLabel: "P",
-            shortLabelColor: Colors.red,
-            dateTimeText: "17:00",
-            userAvatars: ["L", "T", "E"],
-            priority: 2,
-          ),
-          Task(
-            title: "Client Meeting",
-            statusLabel: "PENDING",
-            statusColor: Colors.yellow[300],
-            shortLabel: "P",
-            shortLabelColor: Colors.orange,
-            dateTimeText: "15:00",
-            userAvatars: ["K", "R"],
-            priority: 3,
-          ),
-        ],
-      ),
-    ];
-    // Ban đầu không lọc, _filteredDayGroups là bản sao của _originalDayGroups
-    _filteredDayGroups = _originalDayGroups
-        .map((dayGroup) => DayGroup(
-              dayLabel: dayGroup.dayLabel,
-              tasks: List.from(dayGroup.tasks),
-              isExpanded: dayGroup.isExpanded,
-            ))
-        .toList();
+    _loadData(); 
   }
+
+  Future<void> _loadData() async {
+    List<ToDo> defaultToDo = await DatabaseHelper.instance.getAllToDos();
+
+    _originalDayGroups = defaultToDo
+        .fold<Map<String, List<ToDo>>>({}, (grouped, todo) {
+      String dayLabel = DateFormat('dd/MM/yyyy').format(todo.date ?? DateTime.now());
+      grouped.putIfAbsent(dayLabel, () => []).add(todo);
+      return grouped;
+    })
+        .entries
+        .map((entry) => DayGroup(dayLabel: entry.key, todoList: entry.value))
+        .toList();
+
+    _originalDayGroups.sort((a, b) {
+      DateTime dateA = DateFormat('dd/MM/yyyy').parse(a.dayLabel);
+      DateTime dateB = DateFormat('dd/MM/yyyy').parse(b.dayLabel);
+      return dateA.compareTo(dateB);
+    });
+
+    setState(() {
+      _filteredDayGroups = _originalDayGroups
+          .map((dayGroup) => DayGroup(
+                dayLabel: dayGroup.dayLabel,
+                todoList: List.from(dayGroup.todoList),
+                isCollapsed: dayGroup.isCollapsed,
+              ))
+          .toList();
+    });
+  }
+
 
   /// Hàm trả về màu theo độ ưu tiên:
   /// 1 = Quan trọng (đỏ), 2 = Ít quan trọng hơn (vàng), 3 = Bình thường (xanh lá)
@@ -200,21 +165,25 @@ void _showFilterDialog(int dayIndex) {
                 onPressed: () {
                   // Áp dụng lọc cho nhóm có chỉ số dayIndex
                   setState(() {
-                    List<Task> filteredTasks = _originalDayGroups[dayIndex].tasks.where((task) {
-                      bool matchesPriority = _selectedPriorityFilter == null ||
-                          task.priority == _selectedPriorityFilter;
-                      bool matchesTime = _timeFilterController.text.isEmpty ||
-                          task.dateTimeText.contains(_timeFilterController.text);
-                      bool matchesSearch = _searchFilterController.text.isEmpty ||
-                          task.title.toLowerCase().contains(
-                              _searchFilterController.text.toLowerCase());
-                      return matchesPriority && matchesTime && matchesSearch;
-                    }).toList();
+                   List<ToDo> filteredTasks = _originalDayGroups[dayIndex].todoList.where((todo) {
+                    bool matchesPriority = _selectedPriorityFilter == null ||
+                        todo.priority == _selectedPriorityFilter;
+
+                    bool matchesTime = _timeFilterController.text.isEmpty ||
+                        todo.date.toString().contains(_timeFilterController.text);
+
+                    bool matchesSearch = _searchFilterController.text.isEmpty ||
+                        (todo.todoTitle ?? "").toLowerCase().contains(
+                            _searchFilterController.text.toLowerCase());
+
+                    return matchesPriority && matchesTime && matchesSearch;
+                  }).toList();
+
 
                     _filteredDayGroups[dayIndex] = DayGroup(
                       dayLabel: _originalDayGroups[dayIndex].dayLabel,
-                      tasks: filteredTasks,
-                      isExpanded: _filteredDayGroups[dayIndex].isExpanded,
+                      todoList: filteredTasks,
+                      isCollapsed: _filteredDayGroups[dayIndex].isCollapsed,
                     );
                   });
                   Navigator.of(context).pop();
@@ -235,8 +204,8 @@ void _showFilterDialog(int dayIndex) {
     setState(() {
       _filteredDayGroups[dayIndex] = DayGroup(
         dayLabel: _originalDayGroups[dayIndex].dayLabel,
-        tasks: List.from(_originalDayGroups[dayIndex].tasks),
-        isExpanded: _filteredDayGroups[dayIndex].isExpanded,
+        todoList: List.from(_originalDayGroups[dayIndex].todoList),
+        isCollapsed: _filteredDayGroups[dayIndex].isCollapsed,
       );
     });
   }
@@ -292,8 +261,8 @@ void _showFilterDialog(int dayIndex) {
             children: List.generate(_filteredDayGroups.length, (dayIndex) {
               DayGroup dayGroup = _filteredDayGroups[dayIndex];
               // Kiểm tra nếu bộ lọc đã được áp dụng cho nhóm này
-              bool isFiltered = _filteredDayGroups[dayIndex].tasks.length <
-                  _originalDayGroups[dayIndex].tasks.length;
+              bool isFiltered = _filteredDayGroups[dayIndex].todoList.length <
+                  _originalDayGroups[dayIndex].todoList.length;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -308,7 +277,7 @@ void _showFilterDialog(int dayIndex) {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      dayGroup.isExpanded
+                      dayGroup.isCollapsed
                           ? Row(
                               children: [
                                 GestureDetector(
@@ -336,7 +305,7 @@ void _showFilterDialog(int dayIndex) {
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      dayGroup.isExpanded = !dayGroup.isExpanded;
+                                      dayGroup.isCollapsed = !dayGroup.isCollapsed;
                                     });
                                   },
                                   child: const Text(
@@ -349,7 +318,7 @@ void _showFilterDialog(int dayIndex) {
                           : GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  dayGroup.isExpanded = !dayGroup.isExpanded;
+                                  dayGroup.isCollapsed = !dayGroup.isCollapsed;
                                 });
                               },
                               child: const Text(
@@ -361,30 +330,31 @@ void _showFilterDialog(int dayIndex) {
                   ),
                   const SizedBox(height: 16),
                   // Hiển thị danh sách task:
-                  // Nếu expanded: dạng carousel (hàng ngang)
-                  // Nếu collapsed: dạng danh sách dọc
-                  dayGroup.isExpanded
-                      ? SizedBox(
+                  // Nếu expanded: dạng dọc (hàng ngang)
+                  // Nếu collapsed: dạng ngang
+                  dayGroup.isCollapsed
+                      ?  Column(
+                          children: dayGroup.todoList.map((todo) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _buildTaskCard(todo),
+                            );
+                          }).toList(),
+                        ):
+                        SizedBox(
                           height: 200,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
-                            itemCount: dayGroup.tasks.length,
+                            itemCount: dayGroup.todoList.length,
                             separatorBuilder: (context, index) =>
                                 const SizedBox(width: 16),
-                            itemBuilder: (context, taskIndex) {
-                              final task = dayGroup.tasks[taskIndex];
+                            itemBuilder: (context, todoIndex) {
+                              final task = dayGroup.todoList[todoIndex];
                               return _buildTaskCard(task);
                             },
                           ),
                         )
-                      : Column(
-                          children: dayGroup.tasks.map((task) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: _buildTaskCard(task),
-                            );
-                          }).toList(),
-                        ),
+                      ,
                   const SizedBox(height: 24),
                 ],
               );
@@ -396,7 +366,7 @@ void _showFilterDialog(int dayIndex) {
   }
 
   /// Hàm tạo card task với viền màu bên trái (theo status) và bên phải (theo priority) + bo tròn
-  Widget _buildTaskCard(Task task) {
+  Widget _buildTaskCard(ToDo todo) {
     return Container(
       width: 250,
       decoration: BoxDecoration(
@@ -414,14 +384,14 @@ void _showFilterDialog(int dayIndex) {
         borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
-            // Thanh màu bên trái (status)
+            // Chỉ 1 thanh màu thôi dùng để chỉ độ ưu tiên của todo
             Container(
               width: 6,
               decoration: BoxDecoration(
-                color: task.statusColor ?? Colors.grey,
+                color: getPriorityColor(todo.priority ?? 0),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
                 ),
               ),
             ),
@@ -433,7 +403,7 @@ void _showFilterDialog(int dayIndex) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      task.title,
+                      todo.todoTitle ?? "",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -445,35 +415,22 @@ void _showFilterDialog(int dayIndex) {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: task.statusColor ?? Colors.grey,
+                            color: getPriorityColor(todo.priority ?? 0),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            task.statusLabel,
+                            todo.isDone ? "Pending" : "Complete",
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: task.shortLabelColor ?? Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            task.shortLabel,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                         const Spacer(),
                         Text(
-                          task.dateTimeText,
+                          todo.date != null 
+                          ? DateFormat('HH:mm').format(todo.date!) 
+                          : DateFormat('HH:mm').format(DateTime.now()),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -486,13 +443,13 @@ void _showFilterDialog(int dayIndex) {
                       height: 40,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: task.userAvatars.length,
+                        itemCount: 3, //CHỨC NĂNG COOP SẼ ĐƯỢC THÊM SAU NÊN HIỆN TẠI CHỈ ĐỂ 3 CÁI AVATAR TRỐNG
                         separatorBuilder: (context, index) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
-                          final avatarText = task.userAvatars[index];
+                          final avatarText = "A";
                           return CircleAvatar(
                             radius: 20,
-                            backgroundColor: getPriorityColor(task.priority),
+                            backgroundColor: getPriorityColor(todo.priority ?? 0),
                             child: Text(
                               avatarText,
                               style: const TextStyle(color: Colors.white),
@@ -502,17 +459,6 @@ void _showFilterDialog(int dayIndex) {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-            // Thanh màu bên phải (priority)
-            Container(
-              width: 6,
-              decoration: BoxDecoration(
-                color: getPriorityColor(task.priority),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
                 ),
               ),
             ),
@@ -526,35 +472,14 @@ void _showFilterDialog(int dayIndex) {
 /// Model nhóm task theo ngày
 class DayGroup {
   final String dayLabel;
-  final List<Task> tasks;
-  bool isExpanded; // true: hiển thị theo carousel (hàng ngang), false: hiển thị dọc
+  final List<ToDo> todoList;
+  bool isCollapsed = true; // true: hiển thị theo carousel (hàng ngang), false: hiển thị dọc
 
   DayGroup({
     required this.dayLabel,
-    required this.tasks,
-    this.isExpanded = false,
+    required this.todoList,
+    this.isCollapsed = false,
   });
 }
 
-/// Model dữ liệu cho từng task
-class Task {
-  final String title;
-  final String statusLabel;
-  final Color? statusColor;
-  final String shortLabel;
-  final Color? shortLabelColor;
-  final String dateTimeText;
-  final List<String> userAvatars;
-  final int priority; // 1 = Quan trọng (đỏ), 2 = Ít quan trọng, 3 = Bình thường
-
-  Task({
-    required this.title,
-    required this.statusLabel,
-    this.statusColor,
-    required this.shortLabel,
-    this.shortLabelColor,
-    required this.dateTimeText,
-    required this.userAvatars,
-    required this.priority,
-  });
-}
+ 

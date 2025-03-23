@@ -1,0 +1,10 @@
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/CMakeFiles/INSTALL.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/CMakeFiles/ALL_BUILD.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/CMakeFiles/ZERO_CHECK.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_plugin.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_app.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/flutter/CMakeFiles/flutter_assemble.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/flutter/CMakeFiles/INSTALL.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/CMakeFiles/doanltdd.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/CMakeFiles/INSTALL.dir
+E:/HUIT file/HK6-HUIT/Mobile platform/doanltdd/build/windows/x64/runner/CMakeFiles/ALL_BUILD.dir

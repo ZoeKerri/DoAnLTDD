@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180379522292",
+    "project_id": "doanltdd-c76a9",
+    "storage_bucket": "doanltdd-c76a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180379522292:android:5f911f16211c8de657baa1",
+        "android_client_info": {
+          "package_name": "com.example.doanltdd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTicxzFsO8s0kS-yz7WFVgRMYDSan2Lfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

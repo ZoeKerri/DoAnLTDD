@@ -53,14 +53,32 @@ class DatabaseHelper {
   }
 
   // Lấy danh sách tất cả ToDo
-  Future<List<ToDo>> getAllToDos() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('ToDo');
+Future<List<ToDo>> getAllToDos() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query('ToDo');
 
-    return List.generate(maps.length, (i) {
-      return ToDo.fromMap(maps[i]);
-    });
+  if (maps.isEmpty) {
+    // Danh sách mặc định
+    List<ToDo> defaultTodos = [
+      ToDo(id: "1", todoTitle: "Học Flutter", priority: 1, isNotify: false, date: DateTime.now()),
+      ToDo(id: "2", todoTitle: "Tập thể dục", priority: 2, isNotify: false, date: DateTime.now()),
+      ToDo(id: "3", todoTitle: "Đọc sách", priority: 2, isNotify: true, date: DateTime.now()),
+      ToDo(id: "4", todoTitle: "Viết báo cáo", priority: 1, isNotify: false, date: DateTime.now()),
+      ToDo(id: "5", todoTitle: "Đi ngủ sớm", priority: 3, isNotify: false, date: DateTime.now()),
+    ];
+
+    // Chèn dữ liệu mặc định vào database
+    for (var todo in defaultTodos) {
+      await db.insert('ToDo', todo.toMap());
+    }
+
+    return defaultTodos;
   }
+
+  // Trả về danh sách từ database nếu có dữ liệu
+  return List.generate(maps.length, (i) => ToDo.fromMap(maps[i]));
+}
+
 
   // Cập nhật trạng thái hoàn thành
   Future<int> updateToDo(ToDo todo) async {

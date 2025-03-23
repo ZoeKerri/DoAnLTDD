@@ -24,10 +24,21 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true, // Cho phép nội dung tràn lên AppBar
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, // AppBar trong suốt
+        elevation: 0, // Loại bỏ bóng
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.black), 
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/todo_background.jpg"), // Ảnh nền
+            image: AssetImage("images/login_screen.png"), // Ảnh nền
             fit: BoxFit.cover,
             alignment: Alignment.center
           ),

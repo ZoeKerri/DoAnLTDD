@@ -1,65 +1,64 @@
+import 'package:doanltdd/screens/TaskOverviewScreen.dart';
 import 'package:flutter/material.dart';
 import 'todo_screen.dart';
 import '../widgets/dashboard_layout.dart';
 import '../widgets/menu_card.dart';
+import 'login_screen.dart'; 
+import '../notification.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0; // Lưu trạng thái của tab hiện tại
+
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      // Khi nhấn vào tab "Tài khoản", chuyển sang màn hình LogInScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LogInScreen()),
+      );
+    } else {
+      setState(() {
+        _selectedIndex = index; // Chỉ cập nhật index nếu là tab Home
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hello Hoang Phu Test'),
         backgroundColor: Colors.white,
-        elevation: 4, // Tạo bóng đổ cho app bar
+        elevation: 4,
         actions: [
-          Container( // Custom styling cho nút notification
+          Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.blue,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Colors.blue.shade800, // Viền đậm màu
+                color: Colors.blue.shade800,
                 width: 2,
               ),
             ),
             child: IconButton(
               icon: const Icon(Icons.notifications, color: Colors.white),
               onPressed: () => print('Đã chọn thông báo'),
-              splashRadius: 20, // Kiểm soát kích thước hiệu ứng nhấn
+              splashRadius: 20,
               padding: const EdgeInsets.all(10),
             ),
           ),
         ],
       ),
-      body: DashboardLayout( // Sử dụng layout component tùy chỉnh
-        createSchedule: MenuCard(
-          title: 'Tạo lịch',
-          color: Colors.blue[200]!, // Màu pastel
-          onTap: () {
-            // Navigation đến màn hình TodoScreen
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TodoScreen()),
-            );
-          },
-        ),
-        history: MenuCard(
-          title: 'Lịch sử',
-          color: Colors.green[200]!,
-          onTap: () => print('Đã chọn lịch sử'),
-        ),
-        statistics: MenuCard(
-          title: 'Thống kê',
-          color: Colors.orange[200]!,
-          onTap: () => print('Đã chọn thống kê'),
-        ),
-        donate: MenuCard(
-          title: 'Đóng góp',
-          color: Colors.purple[200]!,
-          onTap: () => print('Đã chọn đóng góp'),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar( // Thanh điều hướng chính
+      body: HomeContent(), // Chỉ hiển thị nội dung Home, không cần đổi theo tab
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped, // Xử lý khi nhấn vào tab
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -70,6 +69,46 @@ class HomeScreen extends StatelessWidget {
             label: 'Tài khoản',
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Phần nội dung của màn hình Home (không thay đổi)
+class HomeContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DashboardLayout(
+      createSchedule: MenuCard(
+        title: 'Tạo lịch',
+        color: Colors.blue[200]!,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TodoScreen()),
+          );
+        },
+      ),
+      history: MenuCard(
+        title: 'Lịch sử',
+        color: Colors.green[200]!,
+        onTap: () {
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TaskOverviewScreen()),
+      );},
+      ),
+      statistics: MenuCard(
+        title: 'Thống kê',
+        color: Colors.orange[200]!,
+        onTap: () async {
+            await NotificationService.showNotification();
+          }
+      ),
+      donate: MenuCard(
+        title: 'Đóng góp',
+        color: Colors.purple[200]!,
+        onTap: () => print('Đã chọn đóng góp'),
       ),
     );
   }

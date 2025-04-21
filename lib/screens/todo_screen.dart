@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/todo.dart';
 import '../components/todo_items.dart';
 import '../database/database_helper.dart';
-import '../models/todo.dart';
 
 class TodoScreen extends StatefulWidget {
   TodoScreen({Key? key}) : super(key: key);

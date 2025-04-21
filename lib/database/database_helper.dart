@@ -39,7 +39,9 @@ class DatabaseHelper {
         priority INTEGER,
         isNotify INTEGER,
         date TEXT,
-        isDone INTEGER
+        isDone INTEGER,
+        updatedAt TEXT,
+        isSynced INTEGER
       )
     ''');
   }
@@ -96,4 +98,16 @@ Future<List<ToDo>> getAllToDos() async {
     final db = await database;
     return await db.delete('ToDo', where: 'id = ?', whereArgs: [id]);
   }
+
+  // lấy list todo chưa được đồng bộ ở local up lên firebase 
+  Future<List<ToDo>> getUnsyncedToDos() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'ToDo',
+    where: 'isSynced = ?',
+    whereArgs: [0],
+  );
+  return List.generate(maps.length, (i) => ToDo.fromMap(maps[i]));
+}
+
 }

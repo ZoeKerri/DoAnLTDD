@@ -5,6 +5,8 @@ import '../widgets/dashboard_layout.dart';
 import '../widgets/menu_card.dart';
 import 'login_screen.dart'; 
 import '../notification.dart';
+import 'package:doanltdd/database/database_helper.dart';
+import 'package:doanltdd/database/firebase_db_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,6 +15,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0; // Lưu trạng thái của tab hiện tại
+
+  //Khởi tạo data từ firebase về hoặc từ sqlite lên
+  @override
+  void initState() {
+    super.initState();
+    initToDoData(); 
+  }
+
+  Future<void> initToDoData() async {
+    final localToDos = await DatabaseHelper.instance.getAllToDos();
+    final firebaseService = FirebaseDBService();
+
+    //chưa có dữ liệu trong sqlite thì lấy trên firebase
+    if (localToDos.isEmpty) {
+      await firebaseService.syncFromFirebase();
+      final newData = await DatabaseHelper.instance.getAllToDos();
+      if(newData.isEmpty) print("Chưa có dữ liệu ở cả 2 firebase và sqlite");
+    }
+
+    //có dữ liệu thì đồng bộ sqlite lên firebase để xem máy local có bị gì k 
+    else{
+      await firebaseService.syncToFirebase();
+    }
+  }
 
   void _onItemTapped(int index) {
     if (index == 1) {

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="gcm_defaultSenderId" translatable="false">180379522292</string>
-    <string name="google_api_key" translatable="false">AIzaSyCTicxzFsO8s0kS-yz7WFVgRMYDSan2Lfo</string>
-    <string name="google_app_id" translatable="false">1:180379522292:android:5f911f16211c8de657baa1</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCTicxzFsO8s0kS-yz7WFVgRMYDSan2Lfo</string>
-    <string name="google_storage_bucket" translatable="false">doanltdd-c76a9.firebasestorage.app</string>
-    <string name="project_id" translatable="false">doanltdd-c76a9</string>
+    <string name="firebase_database_url" translatable="false">https://doanltdd-3a47b-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+    <string name="gcm_defaultSenderId" translatable="false">97435960842</string>
+    <string name="google_api_key" translatable="false">AIzaSyCiib-Kbe94SS_AEKvVVrlXF-9-e8Si50A</string>
+    <string name="google_app_id" translatable="false">1:97435960842:android:8e16cfc844d12ec116c1f3</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCiib-Kbe94SS_AEKvVVrlXF-9-e8Si50A</string>
+    <string name="google_storage_bucket" translatable="false">doanltdd-3a47b.firebasestorage.app</string>
+    <string name="project_id" translatable="false">doanltdd-3a47b</string>
 </resources>

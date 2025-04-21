@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.doanltdd.app-mergeDebugResources-28:/values-v24/values-v24.xml",
+            "outputFile": "com.example.doanltdd.app-mergeDebugResources-31:/values-v24/values-v24.xml",
             "map": [
                 {
                     "source": "C:\\Users\\ngova\\.gradle\\caches\\8.10.2\\transforms\\707932e288a3bd88fb4a428bc13cc00f\\transformed\\media-1.1.0\\res\\values-v24\\values-v24.xml",

@@ -1,10 +1,9 @@
 // Import thư viện Flutter Material và màn hình chính
-import 'package:doanltdd/screens/TaskOverviewScreen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'notification.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';//firebase chưa xong sẽ tiếp tục làm tiếp 
+import 'package:firebase_database/firebase_database.dart';
 
 
 //LƯU Ý PHẢI CHẠY TRÊN GIẢ LẬP ANDROID CHỨ CHẠY TRÊN WEB NÓ K LOAD ĐƯỢC SQLITE
@@ -15,6 +14,9 @@ void main() async{
   // WidgetsFlutterBinding.ensureInitialized();
   // await NotificationService.initialize();
   // NotificationService.scheduleNotification(14, 43);//test thông báo khi đến giờ (sẽ tiếp tục xây dựng tiếp sau)
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseDatabase.instance.setLoggingEnabled(true);
   runApp(MyApp());
 }
 

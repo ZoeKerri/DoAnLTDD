@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:doanltdd/models/todo.dart';
+import 'package:doanltdd/models/users.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -29,8 +30,6 @@ class DatabaseHelper {
     );
   }
 
-
-
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE ToDo (
@@ -42,8 +41,18 @@ class DatabaseHelper {
         isDone INTEGER
       )
     ''');
+
+    // Thêm bảng Users
+    await db.execute('''
+      CREATE TABLE Users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        password TEXT
+      )
+    ''');
   }
-  
+
   //k có kiểu boolean nên xài interger
 
   // Thêm ToDo vào SQLite
@@ -78,4 +87,59 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete('ToDo', where: 'id = ?', whereArgs: [id]);
   }
+
+  // Đăng ký người dùng
+  Future<int> registerUser(String name, String email, String password) async {
+    final db = await database;
+    return await db.insert('Users', {
+      'name': name,
+      'email': email,
+      'password': password,
+    });
+  }
+
+  // Đăng nhập người dùng
+  Future<bool> loginUser(String email, String password) async {
+    final db = await database;
+    final result = await db.query(
+      'Users',
+      where: 'email = ? AND password = ?',
+      whereArgs: [email, password],
+    );
+    return result.isNotEmpty;
+  }
+
+  // Kiểm tra email đã tồn tại chưa
+  Future<bool> isEmailExists(String email) async {
+    final db = await database;
+    final result = await db.query(
+      'Users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return result.isNotEmpty;
+  }
+
+  // Thêm User mới
+Future<int> insertUser(User user) async {
+  final db = await database;
+  return await db.insert('users', user.toMap());
 }
+
+// Tìm User theo tên và mật khẩu
+Future<User?> getUserByNameAndPassword(String name, String password) async {
+  final db = await database;
+  final result = await db.query(
+    'users',
+    where: 'name = ? AND password = ?',
+    whereArgs: [name, password],
+  );
+
+  if (result.isNotEmpty) {
+    return User.fromMap(result.first);
+  }
+  return null;
+}
+
+}
+

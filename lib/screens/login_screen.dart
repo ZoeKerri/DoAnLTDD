@@ -1,5 +1,8 @@
 import 'package:doanltdd/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:doanltdd/database/database_helper.dart';
+import 'package:doanltdd/models/users.dart';
+
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen ({super.key});
@@ -109,14 +112,26 @@ class _LogInScreenState extends State<LogInScreen> {
           }),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_loginFormKey.currentState!.validate()) {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Đăng nhập thành công!")),
+                final user = await DatabaseHelper.instance.getUserByNameAndPassword(
+                  usernameController.text.trim(),
+                  passwordController.text.trim(),
                 );
+
+                if (user != null) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Đăng nhập thành công!")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Tên hoặc mật khẩu không đúng")),
+                  );
+                }
               }
             },
+
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.blue,
@@ -159,16 +174,25 @@ class _LogInScreenState extends State<LogInScreen> {
           }),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_signUpFormKey.currentState!.validate()) {
+              // Thêm người dùng vào database
+                final newUser = User(
+                  name: nameController.text.trim(),
+                  email: emailController.text.trim(),
+                  password: signUpPasswordController.text.trim(),
+                );
+                await DatabaseHelper.instance.insertUser(newUser);
+
                 setState(() {
-                  isLogin = true;
+                  isLogin = true; // Chuyển về màn login
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Đăng ký thành công!")),
                 );
               }
             },
+
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.blue,

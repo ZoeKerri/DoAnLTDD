@@ -1,0 +1,2 @@
+D:/Hoc/LTDD/Doan/28-4-2025/DoAnLTDD-24-3-2025/android/app/.cxx/Debug/2u3x2a1e/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/Hoc/LTDD/Doan/28-4-2025/DoAnLTDD-24-3-2025/android/app/.cxx/Debug/2u3x2a1e/arm64-v8a/CMakeFiles/rebuild_cache.dir

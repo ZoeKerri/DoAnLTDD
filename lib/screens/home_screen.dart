@@ -1,9 +1,14 @@
+import 'package:doanltdd/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'todo_screen.dart';
+import 'statistics_screen.dart';
+import '../models/todo.dart';
 import '../widgets/dashboard_layout.dart';
 import '../widgets/menu_card.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +56,16 @@ class HomeScreen extends StatelessWidget {
         statistics: MenuCard(
           title: 'Thống kê',
           color: Colors.orange[200]!,
-          onTap: () => print('Đã chọn thống kê'),
+          onTap: () async {
+            List<ToDo> todos = await DatabaseHelper.instance.getAllToDos();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StatisticsScreen(todos: todos),
+              ),
+            );
+          },
         ),
         donate: MenuCard(
           title: 'Đóng góp',

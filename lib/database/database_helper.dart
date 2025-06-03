@@ -140,7 +140,9 @@ class DatabaseHelper {
 }
   Future<int> insertUser(User user) async {
     final db = await database;
-    final id = await db.insert('users', user.toMap());
+    final id = await db.insert('users', 
+    user.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 

@@ -124,36 +124,41 @@ class _LogInScreenState extends State<LogInScreen> {
             onPressed: () async {
               if (_loginFormKey.currentState!.validate()) {
                 final userSnapshot = await FirebaseDBService().read(path: "users");
+                if (userSnapshot != null && userSnapshot.value is List) {
+                  final List<dynamic> userList = userSnapshot.value as List<dynamic>;
 
-              if (userSnapshot != null && userSnapshot.value is Map) {
-                final Map<dynamic, dynamic>? usersData = userSnapshot.value as Map<dynamic, dynamic>?;
-                if (usersData != null) {
                   String userName = usernameController.text.trim();
                   String password = passwordController.text.trim();
-                  for (var entry in usersData.entries) {
-                    final String userId = entry.key;
-                    final Map<String, dynamic> userData = Map<String, dynamic>.from(entry.value as Map);
-                    final String storedPassword = userData['password'] ?? ''; 
-                    final String storedName = userData['name'] ?? ''; 
-                    if(storedName == userName &&  storedPassword == password){
-                      
-                    await _saveCurrentUserId(userId);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Đăng nhập thành công!")),
-                    );
+
+                  for (var entry in userList) {
+                    if (entry == null || entry is! Map) continue; // Bỏ qua null hoặc không phải Map
+
+                    final Map<String, dynamic> userData = Map<String, dynamic>.from(entry);
+                    final String storedPassword = userData['password'] ?? '';
+                    final String storedName = userData['name'] ?? '';
+                    final String userId = userData['id'] ?? '';
+
+                    if (storedName == userName && storedPassword == password) {
+                      await _saveCurrentUserId(userId);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Đăng nhập thành công!")),
+                      );
+                      return;
                     }
                   }
-                } 
-              }
-              else {
-                print("Chưa có snapshot này!");
+
+                  // Không khớp dữ liệu
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Tên đăng nhập hoặc mật khẩu sai")),
+                  );
+                } else {
+                  print("Không có danh sách người dùng hoặc dữ liệu không hợp lệ");
                 }
-            }
-            },
+              }},
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.blue,

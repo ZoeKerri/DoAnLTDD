@@ -25,7 +25,7 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
 
   // Các biến lưu tiêu chí lọc (áp dụng cho từng nhóm khi nhấn Lọc)
   int? _selectedPriorityFilter; // 1, 2, 3 hoặc null (không lọc theo mức độ)
-  bool? _selectedCompletionFilter; // true (Hoàn thành), false (Chưa hoàn thành), hoặc null (Không lọc)
+  bool? _selectedCompletionFilter; 
   final TextEditingController _timeFilterController = TextEditingController();
   final TextEditingController _searchFilterController = TextEditingController();
 
@@ -207,7 +207,7 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text("Lọc theo trạng thái:"), // Tiêu đề mới
+                    const Text("Lọc theo trạng thái:"),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -279,7 +279,7 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                             todo.priority == _selectedPriorityFilter;
 
                         bool matchesCompletion = _selectedCompletionFilter == null ||
-                            todo.isDone == _selectedCompletionFilter; // Thêm điều kiện lọc trạng thái
+                            todo.isDone == _selectedCompletionFilter; 
 
                         // Chú ý: Cần xử lý parsing thời gian chính xác hơn nếu muốn so sánh
                         // Ví dụ: tách giờ và phút từ todo.date và so sánh với _timeFilterController.text

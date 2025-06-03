@@ -24,7 +24,6 @@ class ToDo {
     updatedAt = updatedAt ?? DateTime.now(), // Nếu không có thì gán thời điểm hiện tại
     collaborators = collaborators ?? {};
 
-  //chưa hiểu lắm về cơ chế copyWith để xem sau
   ToDo copyWith({
     String? id,
     String? todoTitle,

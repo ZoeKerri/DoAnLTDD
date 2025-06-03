@@ -123,27 +123,36 @@ class _LogInScreenState extends State<LogInScreen> {
           ElevatedButton(
             onPressed: () async {
               if (_loginFormKey.currentState!.validate()) {
-                final user = await DatabaseHelper.instance.getUserByNameAndPassword(
-                  usernameController.text.trim(),
-                  passwordController.text.trim(),
-                );
+                final userSnapshot = await FirebaseDBService().read(path: "users");
 
-                if (user != null) {
-                  await _saveCurrentUserId(user.id.toString());
-                  await _saveCurrentUsername(user.name);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Đăng nhập thành công!")),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Tên hoặc mật khẩu không đúng")),
-                  );
-                }
+              if (userSnapshot != null && userSnapshot.value is Map) {
+                final Map<dynamic, dynamic>? usersData = userSnapshot.value as Map<dynamic, dynamic>?;
+                if (usersData != null) {
+                  String userName = usernameController.text.trim();
+                  String password = passwordController.text.trim();
+                  for (var entry in usersData.entries) {
+                    final String userId = entry.key;
+                    final Map<String, dynamic> userData = Map<String, dynamic>.from(entry.value as Map);
+                    final String storedPassword = userData['password'] ?? ''; 
+                    final String storedName = userData['name'] ?? ''; 
+                    if(storedName == userName &&  storedPassword == password){
+                      
+                    await _saveCurrentUserId(userId);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Đăng nhập thành công!")),
+                    );
+                    }
+                  }
+                } 
               }
+              else {
+                print("Chưa có snapshot này!");
+                }
+            }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -161,7 +170,7 @@ class _LogInScreenState extends State<LogInScreen> {
         ],
       ),
     );
-  }
+    }
 
   // Form Sign Up
   Widget buildSignUpForm() {

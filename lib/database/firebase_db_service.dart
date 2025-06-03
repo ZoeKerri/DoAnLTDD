@@ -56,16 +56,14 @@ class FirebaseDBService {
     }
   }
 
-  /* //hàm read từ gpt 
-  Future<Todo?> getTodoById(String id) async {
-  final snapshot = await read(path: "todos/$id");
-  if (snapshot != null) {
-    final data = snapshot.value as Map;
-    return Todo.fromJson(Map<String, dynamic>.from(data));
-  }
-  return null;
-}
- */
+//   Future<Todo?> getTodoById(String id) async {
+//   final snapshot = await read(path: "todos/$id");
+//   if (snapshot != null) {
+//     final data = snapshot.value as Map;
+//     return Todo.fromJson(Map<String, dynamic>.from(data));
+//   }
+//   return null;
+// }
 
   Future<void> createNewToDoWithOwner(ToDo todo, String ownerUserId) async {
     todo.collaborators = { ownerUserId: 'owner' };

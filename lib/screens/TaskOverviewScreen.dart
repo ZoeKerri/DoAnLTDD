@@ -354,7 +354,7 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                       ),
                     ),
                     TextSpan(
-                      text: (_currentUsername.length > 5 ? _currentUsername.substring(0, 5) + '...' : _currentUsername),
+                      text: (_currentUsername.length > 5 ? '${_currentUsername.substring(0, 5)}...' : _currentUsername),
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.normal, // Tên người dùng chữ thường
@@ -527,8 +527,8 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           // Thêm gạch ngang nếu đã hoàn thành
-                          decoration: todo.isDone! ? TextDecoration.lineThrough : TextDecoration.none,
-                          color: todo.isDone! ? Colors.grey : Colors.black,
+                          decoration: todo.isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                          color: todo.isDone ? Colors.grey : Colors.black,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -539,11 +539,11 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: todo.isDone! ? Colors.lightGreen : Colors.orange, // Màu dựa trên trạng thái hoàn thành
+                              color: todo.isDone ? Colors.lightGreen : Colors.orange, // Màu dựa trên trạng thái hoàn thành
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              todo.isDone! ? "Hoàn thành" : "Đang chờ",
+                              todo.isDone ? "Hoàn thành" : "Đang chờ",
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.white, // Đổi màu chữ cho dễ nhìn
@@ -600,11 +600,11 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                           if (canEdit)
                             IconButton(
                               icon: Icon(
-                                todo.isDone! ? Icons.check_box : Icons.check_box_outline_blank,
-                                color: todo.isDone! ? Colors.green : Colors.black,
+                                todo.isDone ? Icons.check_box : Icons.check_box_outline_blank,
+                                color: todo.isDone ? Colors.green : Colors.black,
                               ),
                               onPressed: () {
-                               final updatedTodo = todo.copyWith(isDone: !todo.isDone!);
+                               final updatedTodo = todo.copyWith(isDone: !todo.isDone);
                                   _handleSaveToDo(updatedTodo, updatedTodo.isNotify!);
                                   if(!isLate){
                                     ScaffoldMessenger.of(context).showSnackBar(

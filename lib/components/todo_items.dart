@@ -9,12 +9,12 @@ class TodoItems extends StatefulWidget {
   final Function(ToDo) onClick;
 
   TodoItems({
-    Key? key,
+    super.key,
     required this.todo,
     required this.currentUserId,
     required this.onDelete,
     required this.onClick
-  }) : super(key: key);
+  });
 
   @override
   _TodoItemsState createState() => _TodoItemsState();

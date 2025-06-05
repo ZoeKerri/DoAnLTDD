@@ -53,16 +53,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       bool isThisMonth = todoDay.isAfter(startOfMonth.subtract(const Duration(days: 1)));
 
       if (isToday) {
-        if (todo.isDone) doneToday++;
-        else undoneToday++;
+        if (todo.isDone) {
+          doneToday++;
+        } else {
+          undoneToday++;
+        }
       }
       if (isThisWeek) {
-        if (todo.isDone) doneWeek++;
-        else undoneWeek++;
+        if (todo.isDone) {
+          doneWeek++;
+        } else {
+          undoneWeek++;
+        }
       }
       if (isThisMonth) {
-        if (todo.isDone) doneMonth++;
-        else undoneMonth++;
+        if (todo.isDone) {
+          doneMonth++;
+        } else {
+          undoneMonth++;
+        }
       }
     }
 

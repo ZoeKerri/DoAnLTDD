@@ -90,7 +90,7 @@ class DatabaseHelper {
     for (int i = 0; i < todos.length; i++) {
       ToDo todo = todos[i];
 
-      if (todo.date != null && !todo.isDone!) {
+      if (todo.date != null && !todo.isDone) {
         if (todo.date!.isBefore(now)) {
           ToDo updatedTodo = todo.copyWith(
             isDone: true,
@@ -138,7 +138,7 @@ class DatabaseHelper {
   );
   return List.generate(maps.length, (i) => ToDo.fromMap(maps[i]));
 }
-  Future<int> insertUser(User user) async {
+  Future<int> insertUser(Users user) async {
     final db = await database;
     final id = await db.insert('users', 
     user.toMap(),
@@ -146,7 +146,7 @@ class DatabaseHelper {
     return id;
   }
 
-  Future<User?> getUserByEmail(String email) async {
+  Future<Users?> getUserByEmail(String email) async {
     final db = await database;
     final result = await db.query(
       'users',
@@ -154,13 +154,13 @@ class DatabaseHelper {
       whereArgs: [email],
     );
     if (result.isNotEmpty) {
-      return User.fromMap(result.first);
+      return Users.fromMap(result.first);
     }
     return null;
   }
 
   // Tìm User theo tên và mật khẩu
-  Future<User?> getUserByNameAndPassword(String name, String password) async {
+  Future<Users?> getUserByNameAndPassword(String name, String password) async {
     final db = await database;
     final result = await db.query(
       'users',
@@ -169,13 +169,13 @@ class DatabaseHelper {
     );
 
     if (result.isNotEmpty) {
-      return User.fromMap(result.first);
+      return Users.fromMap(result.first);
     }
     return null;
   }
 
   // Tìm User theo ID
-  Future<User?> getUserById(String id) async {
+  Future<Users?> getUserById(String id) async {
     final db = await database;
     final result = await db.query(
       'users',
@@ -183,7 +183,7 @@ class DatabaseHelper {
       whereArgs: [int.tryParse(id)],
     );
     if (result.isNotEmpty) {
-      return User.fromMap(result.first);
+      return Users.fromMap(result.first);
     }
     return null;
   }

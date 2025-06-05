@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
 
 class TodoScreen extends StatefulWidget {
-  TodoScreen({Key? key}) : super(key: key);
+  const TodoScreen({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -83,13 +83,13 @@ void _showBottomSheet(ToDo? t) {
   final role = t?.collaborators?[_currentUserId] ?? '';
   final bool isViewer = (role == 'viewer');
 
-  TextEditingController _textController = TextEditingController(text: t?.todoTitle ?? "");
-  int _selectedRadio = t?.priority ?? 1;
-  bool _switchValue = t?.isNotify ?? false;
-  DateTime _selectedDate = t?.date ?? DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay(
-    hour: _selectedDate.hour,
-    minute: _selectedDate.minute,
+  TextEditingController textController = TextEditingController(text: t?.todoTitle ?? "");
+  int selectedRadio = t?.priority ?? 1;
+  bool switchValue = t?.isNotify ?? false;
+  DateTime selectedDate = t?.date ?? DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay(
+    hour: selectedDate.hour,
+    minute: selectedDate.minute,
   );
 
   showModalBottomSheet(
@@ -107,7 +107,7 @@ void _showBottomSheet(ToDo? t) {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    controller: _textController,
+                    controller: textController,
                     decoration: InputDecoration(
                       hintText: "Nhập văn bản...",
                     ),
@@ -119,31 +119,31 @@ void _showBottomSheet(ToDo? t) {
                       RadioListTile(
                         title: Text("Quan trọng"),
                         value: 1,
-                        groupValue: _selectedRadio,
+                        groupValue: selectedRadio,
                         onChanged: isViewer
                             ? null
                             : (int? value) {
-                                setState(() => _selectedRadio = value ?? 1);
+                                setState(() => selectedRadio = value ?? 1);
                               },
                       ),
                       RadioListTile(
                         title: Text("Bình thường"),
                         value: 2,
-                        groupValue: _selectedRadio,
+                        groupValue: selectedRadio,
                         onChanged: isViewer
                             ? null
                             : (int? value) {
-                                setState(() => _selectedRadio = value ?? 1);
+                                setState(() => selectedRadio = value ?? 1);
                               },
                       ),
                       RadioListTile(
                         title: Text("Không quan trọng"),
                         value: 3,
-                        groupValue: _selectedRadio,
+                        groupValue: selectedRadio,
                         onChanged: isViewer
                             ? null
                             : (int? value) {
-                                setState(() => _selectedRadio = value ?? 1);
+                                setState(() => selectedRadio = value ?? 1);
                               },
                       ),
                     ],
@@ -154,9 +154,9 @@ void _showBottomSheet(ToDo? t) {
                     children: [
                       Text("Bật/Tắt thông báo"),
                       Switch(
-                        value: _switchValue,
+                        value: switchValue,
                         onChanged: (bool value) {
-                          setState(() => _switchValue = value);
+                          setState(() => switchValue = value);
                         },
                       ),
                     ],
@@ -165,19 +165,19 @@ void _showBottomSheet(ToDo? t) {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
+                      Text("Ngày: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
                       ElevatedButton(
                         onPressed: isViewer
                             ? null
                             : () async {
                                 DateTime? pickedDate = await showDatePicker(
                                   context: context,
-                                  initialDate: _selectedDate,
+                                  initialDate: selectedDate,
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(2100),
                                 );
                                 if (pickedDate != null) {
-                                  setState(() => _selectedDate = pickedDate);
+                                  setState(() => selectedDate = pickedDate);
                                 }
                               },
                         child: Text("Chọn ngày"),
@@ -188,17 +188,17 @@ void _showBottomSheet(ToDo? t) {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Giờ: ${_selectedTime.hour}:${_selectedTime.minute}"),
+                      Text("Giờ: ${selectedTime.hour}:${selectedTime.minute}"),
                       ElevatedButton(
                         onPressed: isViewer
                             ? null
                             : () async {
                                 TimeOfDay? pickedTime = await showTimePicker(
                                   context: context,
-                                  initialTime: _selectedTime,
+                                  initialTime: selectedTime,
                                 );
                                 if (pickedTime != null) {
-                                  setState(() => _selectedTime = pickedTime);
+                                  setState(() => selectedTime = pickedTime);
                                 }
                               },
                         child: Text("Chọn giờ"),
@@ -221,18 +221,18 @@ void _showBottomSheet(ToDo? t) {
                                 Navigator.of(context).pop();
 
                                 DateTime selectedDateTime = DateTime(
-                                  _selectedDate.year,
-                                  _selectedDate.month,
-                                  _selectedDate.day,
-                                  _selectedTime.hour,
-                                  _selectedTime.minute,
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                  selectedTime.hour,
+                                  selectedTime.minute,
                                 );
                                 ToDo todo;
                                 if (t != null) {
                                   // Cập nhật dữ liệu
-                                  t.todoTitle = _textController.text;
-                                  t.priority = _selectedRadio;
-                                  t.isNotify = _switchValue;
+                                  t.todoTitle = textController.text;
+                                  t.priority = selectedRadio;
+                                  t.isNotify = switchValue;
                                   t.date = selectedDateTime;
 
                                   _updateToDo(t);
@@ -241,9 +241,9 @@ void _showBottomSheet(ToDo? t) {
                                   String toDoID = getID();
                                   ToDo newToDo = ToDo(
                                     id: toDoID,
-                                    todoTitle: _textController.text,
-                                    priority: _selectedRadio,
-                                    isNotify: _switchValue,
+                                    todoTitle: textController.text,
+                                    priority: selectedRadio,
+                                    isNotify: switchValue,
                                     date: selectedDateTime,
                                     collaborators: { _currentUserId: 'owner' },
                                   );
@@ -255,7 +255,7 @@ void _showBottomSheet(ToDo? t) {
                                 final int notiId = int.parse(todo.id!).remainder(0x7FFFFFFF);
                                 final tz.TZDateTime scheduledDate = tz.TZDateTime.from(selectedDateTime, tz.local);
                                 final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-                                if (_switchValue && selectedDateTime.isAfter(now)) {
+                                if (switchValue && selectedDateTime.isAfter(now)) {
                                   await NotificationService.scheduleNotification(
                                     id: notiId,
                                     title: 'Nhắc: ${todo.todoTitle}',
@@ -322,9 +322,9 @@ void _showBottomSheet(ToDo? t) {
           onPressed: () {
             _showBottomSheet(null);
           },
-          child: Icon(Icons.add, color: Colors.white),
           backgroundColor: Colors.blue,
           shape: CircleBorder(),
+          child: Icon(Icons.add, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -394,7 +394,7 @@ void _showBottomSheet(ToDo? t) {
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   TextSpan(
-                    text: (_currentUsername.length > 5 ? _currentUsername.substring(0, 5) + '...' : _currentUsername),
+                    text: (_currentUsername.length > 5 ? '${_currentUsername.substring(0, 5)}...' : _currentUsername),
                     style: TextStyle(
                         fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
                   ),

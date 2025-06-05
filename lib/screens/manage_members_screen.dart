@@ -7,10 +7,10 @@ class ManageMembersScreen extends StatefulWidget {
   final ToDo todo;
   final String currentUserId;
   const ManageMembersScreen({
-    Key? key,
+    super.key,
     required this.todo,
     required this.currentUserId,
-  }) : super(key: key);
+  });
 
   @override
   _ManageMembersScreenState createState() => _ManageMembersScreenState();
@@ -19,7 +19,7 @@ class ManageMembersScreen extends StatefulWidget {
 class _ManageMembersScreenState extends State<ManageMembersScreen> {
   late Map<String, String> collabs;
 
-  Map<String, String> _userEmails = {};
+  final Map<String, String> _userEmails = {};
 
   @override
   void initState() {
@@ -173,8 +173,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
 class AddCollaboratorWidget extends StatefulWidget {
   final Function(String userId, String role) onAdded;
-  const AddCollaboratorWidget({Key? key, required this.onAdded})
-      : super(key: key);
+  const AddCollaboratorWidget({super.key, required this.onAdded});
 
   @override
   _AddCollaboratorWidgetState createState() => _AddCollaboratorWidgetState();

@@ -5,14 +5,16 @@ import 'package:flutter/material.dart';
 import 'todo_screen.dart';
 import '../widgets/dashboard_layout.dart';
 import '../widgets/menu_card.dart';
-import 'login_screen.dart';
 import 'package:doanltdd/database/database_helper.dart';
 import 'package:doanltdd/database/firebase_db_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/todo.dart';
 import 'statistics_screen..dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             TextSpan(
               text: _currentUsername.length > 5
-                  ? _currentUsername.substring(0, 5) + '...'
+                  ? '${_currentUsername.substring(0, 5)}...'
                   : _currentUsername,
                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
             ),

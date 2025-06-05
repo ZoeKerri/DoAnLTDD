@@ -32,6 +32,8 @@ void main() async{
 
 // Lớp chính quản lý cấu trúc ứng dụng
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

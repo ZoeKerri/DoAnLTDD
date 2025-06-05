@@ -7,7 +7,7 @@ class DashboardLayout extends StatelessWidget {
   final Widget statistics;
   final Widget donate;
 
-  const DashboardLayout({
+  const DashboardLayout({super.key, 
     required this.createSchedule,
     required this.history,
     required this.statistics,

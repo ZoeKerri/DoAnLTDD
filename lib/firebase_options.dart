@@ -47,30 +47,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCKTey5Y4J15kfK5nBm0baL2_0rQE70zks',
-    appId: '1:180379522292:web:b96e2712e7c2c5e857baa1',
-    messagingSenderId: '180379522292',
-    projectId: 'doanltdd-c76a9',
-    authDomain: 'doanltdd-c76a9.firebaseapp.com',
-    storageBucket: 'doanltdd-c76a9.firebasestorage.app',
-    measurementId: 'G-Y1S8BWH1WB',
+    apiKey: 'AIzaSyDUghvOnymhKZved2gsrWYgX8z_3yooEmM',
+    appId: '1:97435960842:web:c1ffa7e39d3a188116c1f3',
+    messagingSenderId: '97435960842',
+    projectId: 'doanltdd-3a47b',
+    authDomain: 'doanltdd-3a47b.firebaseapp.com',
+    storageBucket: 'doanltdd-3a47b.firebasestorage.app',
+    measurementId: 'G-KVRDL73DX4',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCTicxzFsO8s0kS-yz7WFVgRMYDSan2Lfo',
-    appId: '1:180379522292:android:5f911f16211c8de657baa1',
-    messagingSenderId: '180379522292',
-    projectId: 'doanltdd-c76a9',
-    storageBucket: 'doanltdd-c76a9.firebasestorage.app',
+    apiKey: 'AIzaSyCiib-Kbe94SS_AEKvVVrlXF-9-e8Si50A',
+    appId: '1:97435960842:android:8e16cfc844d12ec116c1f3',
+    messagingSenderId: '97435960842',
+    projectId: 'doanltdd-3a47b',
+    storageBucket: 'doanltdd-3a47b.firebasestorage.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCKTey5Y4J15kfK5nBm0baL2_0rQE70zks',
-    appId: '1:180379522292:web:d82639963a3f88c957baa1',
-    messagingSenderId: '180379522292',
-    projectId: 'doanltdd-c76a9',
-    authDomain: 'doanltdd-c76a9.firebaseapp.com',
-    storageBucket: 'doanltdd-c76a9.firebasestorage.app',
-    measurementId: 'G-L1P91YBH6B',
+    apiKey: 'AIzaSyDUghvOnymhKZved2gsrWYgX8z_3yooEmM',
+    appId: '1:97435960842:web:c788d933e7e3085a16c1f3',
+    messagingSenderId: '97435960842',
+    projectId: 'doanltdd-3a47b',
+    authDomain: 'doanltdd-3a47b.firebaseapp.com',
+    storageBucket: 'doanltdd-3a47b.firebasestorage.app',
+    measurementId: 'G-HVX1W0ZG0H',
   );
+
 }

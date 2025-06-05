@@ -6,7 +6,7 @@ class MenuCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap; // Callback khi nhấn
 
-  const MenuCard({
+  const MenuCard({super.key, 
     required this.title,
     required this.color,
     required this.onTap,

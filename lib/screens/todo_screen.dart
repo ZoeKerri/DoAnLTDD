@@ -1,11 +1,15 @@
+import 'package:doanltdd/database/firebase_db_service.dart';
+import 'package:doanltdd/service/notification.dart';
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
 import '../components/todo_items.dart';
 import '../database/database_helper.dart';
-import '../models/todo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:intl/intl.dart';
 
 class TodoScreen extends StatefulWidget {
-  TodoScreen({Key? key}) : super(key: key);
+  const TodoScreen({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -15,41 +19,42 @@ class _HomeState extends State<TodoScreen> {
   List<ToDo> todoList = [];
   List<ToDo> _foundToDoLlist = [];
 
+  late String _currentUserId;
+  String _currentUsername = "";
+
   @override
   void initState() {
-  super.initState();
-  _initializeToDoList();
+    super.initState();
+    _initializeToDoList();
   }
 
   void _initializeToDoList() async {
-    List<ToDo> data = await DatabaseHelper.instance.getAllToDos(); 
+    final prefs = await SharedPreferences.getInstance();
+    _currentUserId = prefs.getString('currentUserId') ?? '';
 
-    if (data.isEmpty) {
-      List<ToDo> defaultTodos = [
-        ToDo(id: "1", ToDoText: "Học Flutter", priority: 1, isNotify: false, date: DateTime.now()),
-        ToDo(id: "2", ToDoText: "Tập thể dục", priority: 2, isNotify: false, date: DateTime.now()),
-        ToDo(id: "3", ToDoText: "Đọc sách", priority: 2, isNotify: true, date: DateTime.now()),
-        ToDo(id: "4", ToDoText: "Viết báo cáo", priority: 1, isNotify: false, date: DateTime.now()),
-        ToDo(id: "5", ToDoText: "Đi ngủ sớm", priority: 3, isNotify: false, date: DateTime.now()),
-      ];
-
-      for (var todo in defaultTodos) {
-        await DatabaseHelper.instance.insertToDo(todo); 
-      }
-
-      data = await DatabaseHelper.instance.getAllToDos(); 
+    await FirebaseDBService().syncFromFirebase(_currentUserId);
+    List<ToDo> data = await DatabaseHelper.instance.getAllToDos();
+    for (var t in data) {
+      print("→ ToDo(id=${t.id}, title=${t.todoTitle}, collabs=${t.collaborators})");
     }
+    data = data.where((t) => t.collaborators?.containsKey(_currentUserId) ?? false).toList();
 
     setState(() {
       todoList = data;
       _foundToDoLlist = data;
+      _currentUsername = prefs.getString('currentUsername') ?? '';
     });
   }
 
+
   void _deleteToDoItem(String id) async {
-    await DatabaseHelper.instance.deleteToDo(id); 
+    final int notiId = int.parse(id).remainder(0x7FFFFFFF);
+    await NotificationService.cancelNotification(notiId);
+    await DatabaseHelper.instance.deleteToDo(id);
+    await FirebaseDBService().deleteTodo(id); 
     setState(() {
       todoList.removeWhere((item) => item.id == id); 
+      _foundToDoLlist = List.from(todoList);
     });
   }
 
@@ -63,7 +68,7 @@ class _HomeState extends State<TodoScreen> {
     }
     else{
       results = todoList
-      .where((item) => item.ToDoText!
+      .where((item) => item.todoTitle!
       .toLowerCase()
       .contains(enteredKey.toLowerCase())
       ).toList();
@@ -75,13 +80,16 @@ class _HomeState extends State<TodoScreen> {
   }
 
 void _showBottomSheet(ToDo? t) {
-  TextEditingController _textController = TextEditingController(text: t?.ToDoText ?? "");
-  int _selectedRadio = t?.priority ?? 1;
-  bool _switchValue = t?.isNotify ?? false;
-  DateTime _selectedDate = t?.date ?? DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay(
-    hour: _selectedDate.hour,
-    minute: _selectedDate.minute,
+  final role = t?.collaborators?[_currentUserId] ?? '';
+  final bool isViewer = (role == 'viewer');
+
+  TextEditingController textController = TextEditingController(text: t?.todoTitle ?? "");
+  int selectedRadio = t?.priority ?? 1;
+  bool switchValue = t?.isNotify ?? false;
+  DateTime selectedDate = t?.date ?? DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay(
+    hour: selectedDate.hour,
+    minute: selectedDate.minute,
   );
 
   showModalBottomSheet(
@@ -99,8 +107,11 @@ void _showBottomSheet(ToDo? t) {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(hintText: "Nhập văn bản..."),
+                    controller: textController,
+                    decoration: InputDecoration(
+                      hintText: "Nhập văn bản...",
+                    ),
+                    enabled: !isViewer,
                   ),
                   SizedBox(height: 16),
                   Column(
@@ -108,26 +119,32 @@ void _showBottomSheet(ToDo? t) {
                       RadioListTile(
                         title: Text("Quan trọng"),
                         value: 1,
-                        groupValue: _selectedRadio,
-                        onChanged: (int? value) {
-                          setState(() => _selectedRadio = value ?? 1);
-                        },
+                        groupValue: selectedRadio,
+                        onChanged: isViewer
+                            ? null
+                            : (int? value) {
+                                setState(() => selectedRadio = value ?? 1);
+                              },
                       ),
                       RadioListTile(
                         title: Text("Bình thường"),
                         value: 2,
-                        groupValue: _selectedRadio,
-                        onChanged: (int? value) {
-                          setState(() => _selectedRadio = value ?? 1);
-                        },
+                        groupValue: selectedRadio,
+                        onChanged: isViewer
+                            ? null
+                            : (int? value) {
+                                setState(() => selectedRadio = value ?? 1);
+                              },
                       ),
                       RadioListTile(
                         title: Text("Không quan trọng"),
                         value: 3,
-                        groupValue: _selectedRadio,
-                        onChanged: (int? value) {
-                          setState(() => _selectedRadio = value ?? 1);
-                        },
+                        groupValue: selectedRadio,
+                        onChanged: isViewer
+                            ? null
+                            : (int? value) {
+                                setState(() => selectedRadio = value ?? 1);
+                              },
                       ),
                     ],
                   ),
@@ -137,9 +154,9 @@ void _showBottomSheet(ToDo? t) {
                     children: [
                       Text("Bật/Tắt thông báo"),
                       Switch(
-                        value: _switchValue,
+                        value: switchValue,
                         onChanged: (bool value) {
-                          setState(() => _switchValue = value);
+                          setState(() => switchValue = value);
                         },
                       ),
                     ],
@@ -148,19 +165,21 @@ void _showBottomSheet(ToDo? t) {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
+                      Text("Ngày: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
                       ElevatedButton(
-                        onPressed: () async {
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
-                          if (pickedDate != null) {
-                            setState(() => _selectedDate = pickedDate);
-                          }
-                        },
+                        onPressed: isViewer
+                            ? null
+                            : () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (pickedDate != null) {
+                                  setState(() => selectedDate = pickedDate);
+                                }
+                              },
                         child: Text("Chọn ngày"),
                       ),
                     ],
@@ -169,17 +188,19 @@ void _showBottomSheet(ToDo? t) {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Giờ: ${_selectedTime.hour}:${_selectedTime.minute}"),
+                      Text("Giờ: ${selectedTime.hour}:${selectedTime.minute}"),
                       ElevatedButton(
-                        onPressed: () async {
-                          TimeOfDay? pickedTime = await showTimePicker(
-                            context: context,
-                            initialTime: _selectedTime,
-                          );
-                          if (pickedTime != null) {
-                            setState(() => _selectedTime = pickedTime);
-                          }
-                        },
+                        onPressed: isViewer
+                            ? null
+                            : () async {
+                                TimeOfDay? pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: selectedTime,
+                                );
+                                if (pickedTime != null) {
+                                  setState(() => selectedTime = pickedTime);
+                                }
+                              },
                         child: Text("Chọn giờ"),
                       ),
                     ],
@@ -194,42 +215,57 @@ void _showBottomSheet(ToDo? t) {
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
+                        onPressed: isViewer
+                            ? null
+                            : () async {
+                                Navigator.of(context).pop();
 
-                          DateTime selectedDateTime = DateTime(
-                            _selectedDate.year,
-                            _selectedDate.month,
-                            _selectedDate.day,
-                            _selectedTime.hour,
-                            _selectedTime.minute,
-                          );
+                                DateTime selectedDateTime = DateTime(
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                  selectedTime.hour,
+                                  selectedTime.minute,
+                                );
+                                ToDo todo;
+                                if (t != null) {
+                                  // Cập nhật dữ liệu
+                                  t.todoTitle = textController.text;
+                                  t.priority = selectedRadio;
+                                  t.isNotify = switchValue;
+                                  t.date = selectedDateTime;
 
-                          if (t != null) {
-                            // Cập nhật dữ liệu
-                            t.ToDoText = _textController.text;
-                            t.priority = _selectedRadio;
-                            t.isNotify = _switchValue;
-                            t.date = selectedDateTime;
+                                  _updateToDo(t);
+                                  todo = t;
+                                } else {
+                                  String toDoID = getID();
+                                  ToDo newToDo = ToDo(
+                                    id: toDoID,
+                                    todoTitle: textController.text,
+                                    priority: selectedRadio,
+                                    isNotify: switchValue,
+                                    date: selectedDateTime,
+                                    collaborators: { _currentUserId: 'owner' },
+                                  );
 
-                            // Gọi hàm update database
-                            await DatabaseHelper.instance.updateToDo(t);
-                            setState(() {});
-                          } else {
-                            String toDoID = getID();
-                            ToDo newToDo = ToDo(
-                              id: toDoID,
-                              ToDoText: _textController.text,
-                              priority: _selectedRadio,
-                              isNotify: _switchValue,
-                              date: selectedDateTime,
-                            );
+                                  _addToDo(newToDo);
+                                  todo = newToDo;
+                                }
 
-                            await DatabaseHelper.instance.insertToDo(newToDo);
-                            _addToDo(newToDo);
-                          }
-
-                        },
+                                final int notiId = int.parse(todo.id!).remainder(0x7FFFFFFF);
+                                final tz.TZDateTime scheduledDate = tz.TZDateTime.from(selectedDateTime, tz.local);
+                                final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+                                if (switchValue && selectedDateTime.isAfter(now)) {
+                                  await NotificationService.scheduleNotification(
+                                    id: notiId,
+                                    title: 'Nhắc: ${todo.todoTitle}',
+                                    body: 'Hạn: ${DateFormat.yMd().add_Hm().format(scheduledDate)}',
+                                    scheduledDate: scheduledDate,
+                                  );
+                                } else {
+                                  await NotificationService.cancelNotification(notiId);
+                                }
+                              },
                         child: Text(t != null ? "Lưu" : "OK"),
                       ),
                     ],
@@ -249,6 +285,23 @@ void _showBottomSheet(ToDo? t) {
     await DatabaseHelper.instance.insertToDo(t); 
     setState(() {
       todoList.add(t); 
+      _foundToDoLlist = List.from(todoList);
+    });
+  }
+  
+  void _updateToDo(ToDo t) async {
+    await DatabaseHelper.instance.updateToDo(t);
+    
+    setState(() {
+      int index = todoList.indexWhere((todo) => todo.id == t.id);
+      if (index != -1) {
+        todoList[index] = t;
+      }
+      int foundIndex =
+          _foundToDoLlist.indexWhere((todo) => todo.id == t.id);
+      if (foundIndex != -1) {
+        _foundToDoLlist[foundIndex] = t;
+      }
     });
   }
 
@@ -269,9 +322,9 @@ void _showBottomSheet(ToDo? t) {
           onPressed: () {
             _showBottomSheet(null);
           },
-          child: Icon(Icons.add, color: Colors.white),
           backgroundColor: Colors.blue,
           shape: CircleBorder(),
+          child: Icon(Icons.add, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -308,7 +361,13 @@ void _showBottomSheet(ToDo? t) {
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 20),
-        for (ToDo t in _foundToDoLlist) TodoItems(todo: t, onDelete: _deleteToDoItem, onClick: _showBottomSheet ),
+        for (ToDo t in _foundToDoLlist)
+          TodoItems(
+            todo: t,
+            currentUserId: _currentUserId,
+            onDelete: _deleteToDoItem,
+            onClick: _showBottomSheet,
+          ),
       ],
     );
   }
@@ -335,7 +394,7 @@ void _showBottomSheet(ToDo? t) {
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   TextSpan(
-                    text: "Hoang Phu Test".substring(0, 5) + "...",
+                    text: (_currentUsername.length > 5 ? '${_currentUsername.substring(0, 5)}...' : _currentUsername),
                     style: TextStyle(
                         fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
@@ -348,12 +407,7 @@ void _showBottomSheet(ToDo? t) {
     );
     }
     String getID() {
-      if (todoList.isNotEmpty) {
-        ToDo t = todoList.last;
-        int numID = int.parse(t.id ?? "-1") + 1;
-        return numID.toString();
-      }
-      return "1"; // Trả về chuỗi rỗng nếu danh sách rỗng
+      return DateTime.now().millisecondsSinceEpoch.toString().toString();
     }
 
     

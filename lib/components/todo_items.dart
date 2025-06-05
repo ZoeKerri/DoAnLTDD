@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
+import '../screens/manage_members_screen.dart';
 
 class TodoItems extends StatefulWidget {
   ToDo todo;
+  final String currentUserId;
   final Function(String) onDelete;
   final Function(ToDo) onClick;
 
-  TodoItems({Key? key, required this.todo, required this.onDelete, required this.onClick}) : super(key: key);
+  TodoItems({
+    super.key,
+    required this.todo,
+    required this.currentUserId,
+    required this.onDelete,
+    required this.onClick
+  });
 
   @override
   _TodoItemsState createState() => _TodoItemsState();
@@ -60,60 +68,93 @@ void _showDialog(bool status) {
 
   @override
   Widget build(BuildContext context) {
-    
+    final role = widget.todo.collaborators?[widget.currentUserId] ?? '';
+    final isViewer = role == 'viewer';
+    final isOwner = role == 'owner';
+    final canEdit = role == 'owner' || role == 'editor';
+    final canDelete = role == 'owner';
+
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       child: ListTile(
-        onTap: (){
-          widget.onClick(widget.todo); 
+        onTap: () {
+          widget.onClick(widget.todo);
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         tileColor: const Color.fromARGB(255, 216, 216, 216),
-        leading: Checkbox(value: widget.todo.isDone, //leading phần ở đầu bên trái - sẵn demo checkbox ở đây luôn
-        onChanged: (bool ? newValue)// khi gán với toán tử có thể là null thì phải 1 là ép kiểu dùng newValue! ép kiêu có thể thành null trở thành bool
-        //thứ 2 là dùng ?? khi null thì đổi sang trường hợp sau ??
-        // thứ 3 là dùng if else cho chắc
-        {
-          setState(() {
-            widget.todo.isDone = newValue ?? false;
-          });
-
-        _showDialog(widget.todo.isDone);//demo dialog
-          
-        },
+        leading: Checkbox(
+          value: widget.todo.isDone,
+          onChanged: (bool? newValue) {
+            setState(() {
+              widget.todo.isDone = newValue ?? false;
+            });
+            _showDialog(widget.todo.isDone);
+          },
         ),
         title: 
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(widget.todo.ToDoText ?? "", style: TextStyle(fontSize: 16, color: Colors.black,
+            Text(widget.todo.todoTitle ?? "", style: TextStyle(fontSize: 16, color: Colors.black,
               decoration: widget.todo.isDone ? TextDecoration.lineThrough : TextDecoration.none,),
               ),
              Text(
               "Còn ${getRemainingDays(widget.todo.date ?? DateTime.now())} ngày",
               style: TextStyle(fontSize: 7, color: Colors.grey[700]),
             ),
+            Text(
+              "Role: $role",
+              style: TextStyle(fontSize: 10, color: Colors.blueGrey),
+            ),
           ],
         ),
          
-        trailing: SizedBox(
-          height: 35,
-          width: 35,
-          child: FilledButton(
-            onPressed: () {
-              _showDeleteConfirmation();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (canEdit)
+              IconButton(
+                icon: Icon(Icons.edit, color: Colors.black87),
+                onPressed: () {
+                  widget.onClick(widget.todo);
+                },
               ),
-              padding: EdgeInsets.zero, 
-            ),
-            child: Icon(Icons.delete, size: 18, color: Colors.white),
-          ),
+            if (canDelete)
+              SizedBox(
+                height: 35,
+                width: 35,
+                child: FilledButton(
+                  onPressed: () {
+                    _showDeleteConfirmation();
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: Icon(Icons.delete, size: 18, color: Colors.white),
+                ),
+              ),
+            if (isOwner)
+              IconButton(
+                icon: Icon(Icons.group, color: Colors.blueAccent),
+                tooltip: 'Quản lý thành viên',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ManageMembersScreen(
+                        todo: widget.todo,
+                        currentUserId: widget.currentUserId,
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
         ),
       ),
     );

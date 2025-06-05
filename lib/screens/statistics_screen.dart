@@ -53,16 +53,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       bool isThisMonth = todoDay.isAfter(startOfMonth.subtract(const Duration(days: 1)));
 
       if (isToday) {
-        if (todo.isDone) doneToday++;
-        else undoneToday++;
+        if (todo.isDone) {
+          doneToday++;
+        } else {
+          undoneToday++;
+        }
       }
       if (isThisWeek) {
-        if (todo.isDone) doneWeek++;
-        else undoneWeek++;
+        if (todo.isDone) {
+          doneWeek++;
+        } else {
+          undoneWeek++;
+        }
       }
       if (isThisMonth) {
-        if (todo.isDone) doneMonth++;
-        else undoneMonth++;
+        if (todo.isDone) {
+          doneMonth++;
+        } else {
+          undoneMonth++;
+        }
       }
     }
 
@@ -206,7 +215,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 (context, index) {
                   final todo = filteredTodos[index];
                   return ListTile(
-                    title: Text(todo.ToDoText ?? '[Không có nội dung]'),
+                    title: Text(todo.todoTitle ?? '[Không có nội dung]'),
                     subtitle: Text(todo.date != null
                         ? DateFormat('dd/MM/yyyy').format(todo.date!)
                         : '[Không có ngày]'),

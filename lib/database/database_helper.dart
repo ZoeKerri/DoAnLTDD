@@ -30,6 +30,8 @@ class DatabaseHelper {
     );
   }
 
+
+
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE ToDo (
@@ -38,38 +40,76 @@ class DatabaseHelper {
         priority INTEGER,
         isNotify INTEGER,
         date TEXT,
-        isDone INTEGER
+        isDone INTEGER,
+        updatedAt TEXT,
+        isSynced INTEGER,
+        collaborators TEXT
       )
     ''');
 
-    // Thêm bảng Users
     await db.execute('''
-      CREATE TABLE Users (
+      CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT,
-        password TEXT
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
       )
     ''');
   }
-
+  
   //k có kiểu boolean nên xài interger
 
   // Thêm ToDo vào SQLite
   Future<int> insertToDo(ToDo todo) async {
     final db = await database;
-    return await db.insert('ToDo', todo.toMap());
+    return await db.insert('ToDo', 
+    todo.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   // Lấy danh sách tất cả ToDo
+  Future<int> deleteTodo(String id) async {
+    final db = await database;
+    return await db.delete(
+      'ToDo',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Hàm lấy tất cả ToDo và tự động cập nhật trạng thái quá hạn
   Future<List<ToDo>> getAllToDos() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('ToDo');
 
-    return List.generate(maps.length, (i) {
-      return ToDo.fromMap(maps[i]);
-    });
+    final DateTime now = DateTime.now(); // Lấy thời gian hiện tại
+    List<ToDo> todos = List.generate(maps.length, (i) => ToDo.fromMap(maps[i]));
+    List<ToDo> todosToUpdateInDb = []; 
+
+    for (int i = 0; i < todos.length; i++) {
+      ToDo todo = todos[i];
+
+      if (todo.date != null && !todo.isDone) {
+        if (todo.date!.isBefore(now)) {
+          ToDo updatedTodo = todo.copyWith(
+            isDone: true,
+            updatedAt: DateTime.now(), 
+            isSynced: false, 
+          );
+          todos[i] = updatedTodo; 
+          todosToUpdateInDb.add(updatedTodo); 
+        }
+      }
+    }
+
+    for (ToDo todo in todosToUpdateInDb) {
+      await updateToDo(todo); 
+    }
+
+    return todos; 
   }
+
 
   // Cập nhật trạng thái hoàn thành
   Future<int> updateToDo(ToDo todo) async {
@@ -88,58 +128,63 @@ class DatabaseHelper {
     return await db.delete('ToDo', where: 'id = ?', whereArgs: [id]);
   }
 
-  // Đăng ký người dùng
-  Future<int> registerUser(String name, String email, String password) async {
+  // lấy list todo chưa được đồng bộ ở local up lên firebase 
+  Future<List<ToDo>> getUnsyncedToDos() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'ToDo',
+    where: 'isSynced = ?',
+    whereArgs: [0],
+  );
+  return List.generate(maps.length, (i) => ToDo.fromMap(maps[i]));
+}
+  Future<int> insertUser(Users user) async {
     final db = await database;
-    return await db.insert('Users', {
-      'name': name,
-      'email': email,
-      'password': password,
-    });
+    final id = await db.insert('users', 
+    user.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace);
+    return id;
   }
 
-  // Đăng nhập người dùng
-  Future<bool> loginUser(String email, String password) async {
+  Future<Users?> getUserByEmail(String email) async {
     final db = await database;
     final result = await db.query(
-      'Users',
-      where: 'email = ? AND password = ?',
-      whereArgs: [email, password],
-    );
-    return result.isNotEmpty;
-  }
-
-  // Kiểm tra email đã tồn tại chưa
-  Future<bool> isEmailExists(String email) async {
-    final db = await database;
-    final result = await db.query(
-      'Users',
+      'users',
       where: 'email = ?',
       whereArgs: [email],
     );
-    return result.isNotEmpty;
+    if (result.isNotEmpty) {
+      return Users.fromMap(result.first);
+    }
+    return null;
   }
 
-  // Thêm User mới
-Future<int> insertUser(User user) async {
-  final db = await database;
-  return await db.insert('users', user.toMap());
-}
+  // Tìm User theo tên và mật khẩu
+  Future<Users?> getUserByNameAndPassword(String name, String password) async {
+    final db = await database;
+    final result = await db.query(
+      'users',
+      where: 'name = ? AND password = ?',
+      whereArgs: [name, password],
+    );
 
-// Tìm User theo tên và mật khẩu
-Future<User?> getUserByNameAndPassword(String name, String password) async {
-  final db = await database;
-  final result = await db.query(
-    'users',
-    where: 'name = ? AND password = ?',
-    whereArgs: [name, password],
-  );
-
-  if (result.isNotEmpty) {
-    return User.fromMap(result.first);
+    if (result.isNotEmpty) {
+      return Users.fromMap(result.first);
+    }
+    return null;
   }
-  return null;
-}
 
+  // Tìm User theo ID
+  Future<Users?> getUserById(String id) async {
+    final db = await database;
+    final result = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [int.tryParse(id)],
+    );
+    if (result.isNotEmpty) {
+      return Users.fromMap(result.first);
+    }
+    return null;
+  }
 }
-

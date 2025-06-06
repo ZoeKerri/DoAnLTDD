@@ -46,15 +46,6 @@ class DatabaseHelper {
         collaborators TEXT
       )
     ''');
-
-    await db.execute('''
-      CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-      )
-    ''');
   }
   
   //k có kiểu boolean nên xài interger
@@ -127,6 +118,12 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete('ToDo', where: 'id = ?', whereArgs: [id]);
   }
+
+   Future<int> deleteAllToDos() async {
+    final db = await database;
+    return await db.delete('ToDo');
+  }
+
 
   // lấy list todo chưa được đồng bộ ở local up lên firebase 
   Future<List<ToDo>> getUnsyncedToDos() async {

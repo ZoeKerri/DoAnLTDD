@@ -58,6 +58,14 @@ class _HomeState extends State<TodoScreen> {
     });
   }
 
+  void _onCheck(ToDo t) async {
+    final int notiId = int.parse(t.id!).remainder(0x7FFFFFFF);
+    await NotificationService.cancelNotification(notiId);
+    await DatabaseHelper.instance.updateToDo(t);
+    await FirebaseDBService().update(path: "todos/${t.id}", data: t.toMap());
+  }
+
+
 
   void _searching(String enteredKey)
   {
@@ -375,7 +383,8 @@ void _showBottomSheet(ToDo? t) {
             currentUserId: _currentUserId,
             onDelete: _deleteToDoItem,
             onClick: _showBottomSheet,
-            onGroup: _onGroup
+            onGroup: _onGroup,
+            onCheck: _onCheck,
           ),
       ],
     );
@@ -385,6 +394,12 @@ void _showBottomSheet(ToDo? t) {
     return AppBar(
       titleSpacing: 0,
       backgroundColor: Color.fromARGB(255, 0, 195, 255),
+       leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), 
+          onPressed: () {
+            Navigator.of(context).pop(); 
+          },
+        ),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

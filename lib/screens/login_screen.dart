@@ -45,6 +45,11 @@ class _LogInScreenState extends State<LogInScreen> {
     await prefs.setString('currentUsername', username);
   }
 
+  Future<void> _saveCurrentUserGmail(String userGmail) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('currentEmail', userGmail);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -294,12 +299,17 @@ Widget buildSignUpForm() {
       final dbRef = FirebaseDatabase.instance.ref('users/$uid');
       final snapshot = await dbRef.get();
       String fetchedName = '';
+      String fetchedGmail = '';
       if (snapshot.exists) {
         final data = snapshot.value as Map<dynamic, dynamic>;
         fetchedName = (data['name'] ?? '') as String;
+        fetchedGmail = (data['email'] ?? '') as String;
       }
       if (fetchedName.isNotEmpty) {
         await _saveCurrentUsername(fetchedName);
+      }
+      if (fetchedGmail.isNotEmpty){
+        await _saveCurrentUserGmail(fetchedGmail);
       }
 
       Navigator.pushReplacement(
@@ -364,6 +374,7 @@ String? _validateConfirmPassword(String? value, String originalPassword) {
         // 3. Lưu currentUserId và currentUsername vào SharedPreferences
         await _saveCurrentUserId(newUserId);
         await _saveCurrentUsername(newUserName);
+        await _saveCurrentUserGmail(newUser.email);
 
         // 4. Hiển thị thông báo, chuyển sang tab Login để người dùng có thể đăng nhập
         ScaffoldMessenger.of(context).showSnackBar(

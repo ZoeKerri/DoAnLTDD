@@ -164,6 +164,9 @@ class FirebaseDBService {
       }
     }
   }
+  else {
+    await dbHelper.deleteAllToDos();
+  }
 }
 
 }

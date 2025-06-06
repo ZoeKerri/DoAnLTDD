@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SettingsPage()),
+        MaterialPageRoute(builder: (context) => SettingsPage(foundToDo: allTodos,)),
       );
     } else {
       setState(() {
@@ -154,7 +154,7 @@ class HomeContent extends StatelessWidget {
         },
       ),
       history: MenuCard(
-        title: 'Lịch sử',
+        title: 'Quản lý',
         color: Colors.green[200]!,
         onTap: () {
           Navigator.push(

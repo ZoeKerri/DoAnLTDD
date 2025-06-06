@@ -151,6 +151,31 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
     );
   }
 
+  void _onCheck(ToDo t) async {
+
+    final int notiId = int.parse(t.id!).remainder(0x7FFFFFFF);
+    await NotificationService.cancelNotification(notiId);
+
+    await DatabaseHelper.instance.updateToDo(t);
+
+    await FirebaseDBService().update(path: "todos/${t.id}", data: t.toMap());
+
+    await _loadData();
+  }
+
+  void _onGroup(ToDo t) async {
+  setState(() {
+    for (var dayGroup in _originalDayGroups) {
+      int index = dayGroup.todoList.indexWhere((item) => item.id == t.id);
+      if (index != -1) {
+        dayGroup.todoList[index] = t;
+        break; 
+      }
+    }
+  });
+  await _loadData();
+}
+
   void _showFilterDialog(int dayIndex) {
     // Reset các tiêu chí lọc khi mở dialog mới
     _selectedPriorityFilter = null;
@@ -329,11 +354,17 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
       appBar: AppBar(
         titleSpacing: 0,
         backgroundColor: const Color.fromARGB(255, 0, 195, 255),
+         leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), 
+          onPressed: () {
+            Navigator.of(context).pop(); 
+          },
+        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Tạo ToDo List",
+              "Quản lý ToDo List",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -350,14 +381,14 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white,
-                        fontWeight: FontWeight.bold, // Chữ "Hello" in đậm
+                        fontWeight: FontWeight.normal, // Chữ "Hello" in đậm
                       ),
                     ),
                     TextSpan(
                       text: (_currentUsername.length > 5 ? '${_currentUsername.substring(0, 5)}...' : _currentUsername),
                       style: const TextStyle(
                         fontSize: 17,
-                        fontWeight: FontWeight.normal, // Tên người dùng chữ thường
+                        fontWeight: FontWeight.bold, // Tên người dùng chữ thường
                         color: Colors.white,
                       ),
                     ),
@@ -603,9 +634,9 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                                 todo.isDone ? Icons.check_box : Icons.check_box_outline_blank,
                                 color: todo.isDone ? Colors.green : Colors.black,
                               ),
-                              onPressed: () {
+                              onPressed: () async{
                                final updatedTodo = todo.copyWith(isDone: !todo.isDone);
-                                  _handleSaveToDo(updatedTodo, updatedTodo.isNotify!);
+                                  await _handleSaveToDo(updatedTodo, updatedTodo.isNotify!);
                                   if(!isLate){
                                     ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Chỉnh sửa thành công')));
@@ -614,7 +645,6 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Đã quá hạn không thể chỉnh sửa!')));
                                   }
-                                   
                               },
                             ),
                           const SizedBox(width: 8),
@@ -631,6 +661,7 @@ class _TaskOverviewScreenState extends State<TaskOverviewScreen> {
                                     ),
                                   ),
                                 );
+                                _onGroup(todo);
                               },
                             ),
                           const SizedBox(width: 8),

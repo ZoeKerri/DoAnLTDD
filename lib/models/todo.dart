@@ -68,7 +68,7 @@ class ToDo {
   // Chuyển từ Map trong SQLite thành object
   factory ToDo.fromMap(Map<String, dynamic> map) {
     Map<String, String> collabMap = {};
-    if ((map['collaborators'] as String).isNotEmpty) {
+    if (map['collaborators'].isNotEmpty) {
       for (var pair in (map['collaborators'] as String).split(',')) {
         final parts = pair.split(':');
         if (parts.length == 2) {

@@ -119,10 +119,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final filteredTodos = getFilteredTodos();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thống kê ToDo'),
+        backgroundColor: const Color.fromARGB(255, 0, 195, 255), 
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), 
+          onPressed: () {
+            Navigator.of(context).pop(); 
+          },
+        ),
+        title: const Text(
+          'Thống kê ToDo',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _loadStatistics,
           ),
         ],

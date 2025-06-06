@@ -8,6 +8,7 @@ class TodoItems extends StatefulWidget {
   final Function(String) onDelete;
   final Function(ToDo) onClick;
   final Function (ToDo) onGroup;
+  final Function (ToDo) onCheck;
 
   TodoItems({
     super.key,
@@ -15,7 +16,8 @@ class TodoItems extends StatefulWidget {
     required this.currentUserId,
     required this.onDelete,
     required this.onClick,
-    required this.onGroup
+    required this.onGroup,
+    required this.onCheck
   });
 
   @override
@@ -91,6 +93,7 @@ void _showDialog(bool status) {
             setState(() {
               widget.todo.isDone = newValue ?? false;
             });
+            widget.onCheck(widget.todo);
             _showDialog(widget.todo.isDone);
           },
         ),

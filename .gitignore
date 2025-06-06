@@ -1,0 +1,23 @@
+# Flutter build outputs
+build/
+
+# Flutter specific files
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Files related to package manager
+packages/
+
+# Windows specific files
+Thumbs.db
+Desktop.ini
+
+# Large files (temporary or build files)
+*.pdb
+*.dll
+
